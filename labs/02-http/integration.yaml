@@ -24,8 +24,9 @@ spec:
                 constant: "Hola desde platform-http"
     # <<< flows
   traits:
-    ingress:
-      auto: true
+    route:
+      enabled: true
+      tlsTermination: edge
     container:
       expose: true
       requestCPU: "50m"
@@ -33,5 +34,9 @@ spec:
       limitCPU: "300m"
       limitMemory: "384Mi"
       runAsNonRoot: true
+    deployer:
+      kind: deployment
+    deployment:
+      progressDeadlineSeconds: 600
     logging:
       level: INFO

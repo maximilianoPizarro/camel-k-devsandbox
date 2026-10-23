@@ -18,6 +18,10 @@
                 - setVariable:
                     name: question
                     constant: "En una frase, que modelo de OpenShift AI sos?"
+        - removeHeaders:
+            pattern: "CamelHttp*"
+        - removeHeader:
+            name: Host
         - setHeader:
             name: Authorization
             simple: "Bearer ${env:LLM_TOKEN}"
@@ -26,7 +30,7 @@
             constant: application/json
         - setBody:
             simple: '{"model":"isvc-granite-31-8b-fp8","messages":[{"role":"user","content":"${variable.question}"}]}'
-        - to: "https://isvc-granite-31-8b-fp8-predictor.sandbox-shared-models.svc.cluster.local:8443/v1/chat/completions?httpMethod=POST&sslContextParameters=#sandboxSsl&throwExceptionOnFailure=false&responseTimeout=120000"
+        - to: "https://isvc-granite-31-8b-fp8-predictor.sandbox-shared-models.svc.cluster.local:8443/v1/chat/completions?httpMethod=POST&sslContextParameters=#sandboxSsl&bridgeEndpoint=true&throwExceptionOnFailure=false&responseTimeout=120000"
         - log: "modelo HTTP ${header.CamelHttpResponseCode}"
         - choice:
             when:

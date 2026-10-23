@@ -8,6 +8,7 @@ oc-token*
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+.tmp/
 __pycache__/
 *.pyc
 .DS_Store

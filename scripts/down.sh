@@ -11,6 +11,10 @@ echo "Borrando recursos con app.kubernetes.io/part-of=camel-k-workshop"
 
 oc delete integration -l app.kubernetes.io/part-of=camel-k-workshop \
   --ignore-not-found=true --wait=true --timeout=180s
+oc delete integrationkit,build.camel.apache.org -l app.kubernetes.io/part-of=camel-k-workshop \
+  --ignore-not-found=true --wait=true --timeout=180s
+oc delete pod -l camel.apache.org/component=builder \
+  --ignore-not-found=true --wait=true --timeout=180s
 oc delete deployment,service,route,configmap,secret -l app.kubernetes.io/part-of=camel-k-workshop \
   --ignore-not-found=true --wait=true --timeout=180s
 

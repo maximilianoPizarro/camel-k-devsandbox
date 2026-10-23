@@ -35,5 +35,9 @@ spec:
       limitCPU: "400m"
       limitMemory: "512Mi"
       runAsNonRoot: true
+    deployer:
+      kind: deployment
+    deployment:
+      progressDeadlineSeconds: 600
     logging:
       level: INFO

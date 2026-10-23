@@ -2,7 +2,7 @@
 
 Workshop para recorrer Apache Camel K dentro de un workspace de [OpenShift Dev Spaces](https://docs.redhat.com/en/documentation/red_hat_openshift_dev_spaces/3.28/html/user_guide/assembly_getting-started_user_guide) en el mismo [Developer Sandbox](https://developers.redhat.com/developer-sandbox). Cada paso es una tarea del `devfile.yaml`. El paso siguiente borra el anterior, así en el proyecto queda un solo ejemplo vivo.
 
-El operador Camel K ya está instalado en el sandbox y observa tu proyecto. Estos labs no instalan otro operador. El catálogo publicado en el namespace de referencia es Camel 4.8.5 / Quarkus 3.15.3. El Paso 1 imprime el runtime que quedó en la Integration por si el operador resuelve otro catálogo.
+El operador Camel K ya está instalado en el sandbox y observa tu proyecto. Estos labs no instalan otro operador. En el sandbox de referencia el kit arranca con Camel 4.22.0 y Camel Quarkus 3.39.0 (Quarkus 3.39.1). Puede haber un CamelCatalog 3.15.3 en el proyecto; el build usa el runtime del IntegrationPlatform, no ese catálogo. El Paso 1 imprime la versión en el log del pod.
 
 ## Qué vas a dejar corriendo
 
@@ -41,15 +41,15 @@ Kaoto edita el `*.camel.yaml`. [`scripts/sync.py`](scripts/sync.py) copia ese fl
 
 ## Cuota y por qué hay un solo lab vivo
 
-En el sandbox de referencia la cuota de pods largos es 3 CPU de request y 30Gi de memoria, sin GPU. Los builds efímeros tienen otra cuota (3 CPU y 14Gi). El trait `builder` de este operador usa la estrategia `routine`: el build corre en el operador, no como pod de tu proyecto. No la cambies a `pod`.
+En el sandbox de referencia la cuota de pods largos es 3 CPU de request y 30Gi de memoria, sin GPU. Los builds de OpenShift tienen otra cuota (3 CPU y 14Gi). El LimitRange del proyecto pone 1 CPU y 1000Mi de limit a todo contenedor que no declara recursos. Todos los manifiestos de este repo declaran request y limit.
 
-El LimitRange del proyecto pone 1 CPU y 1000Mi de limit a todo contenedor que no declara recursos. Todos los manifiestos de este repo declaran request y limit.
+Sin un `IntegrationPlatform` en tu proyecto, el operador publica la imagen del kit en el namespace `camel-k-operator`. Ese registry no acepta el pull de tu ServiceAccount, y el pod queda en `ImagePullBackOff`. [`scripts/platform.sh`](scripts/platform.sh) crea el IntegrationPlatform `camel-k` para que la imagen quede en un ImageStream de tu proyecto. El build usa la estrategia `routine` (corre dentro del operador) y publica con `S2I`. Un pod builder no sirve en este sandbox: el usuario no puede delegar `builds/status`, y sin eso el builder no puede cerrar el Build. `up.sh` corre ese script antes de cada lab. El primer build baja dependencias Maven y puede tardar varios minutos. No crea un pod de build en tu cuota.
 
-El workspace, un Integration y, en el paso 3, el broker entran juntos. Igual cada paso borra al anterior para no acumular Routes, pods ni el broker mientras avanzás. La regla de cuota por proyecto está en [Resource quotas](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/working_with_quotas/quotas-setting-per-project-quotas). El artículo [Try Camel K in the Developer Sandbox](https://developers.redhat.com/articles/2023/03/30/try-camel-k-developer-sandbox-red-hat-openshift) muestra el mismo modelo: el operador vive fuera de tu proyecto y reacciona al Integration que creás.
+El workspace, un Integration y, en el paso 3, el broker entran juntos. Igual cada paso borra al anterior para no acumular Routes, pods ni el broker mientras avanzás. La regla de cuota por proyecto está en [Resource quotas](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/working_with_quotas/quotas-setting-per-project-quotas). El artículo [Try Camel K in the Developer Sandbox](https://developers.redhat.com/articles/2023/03/30/try-camel-k-developer-sandbox-red-hat-openshift) muestra el mismo modelo: el operador vive fuera de tu proyecto y reacciona al Integration que creás. La configuración del registry está en [Camel K registry](https://camel.apache.org/camel-k/2.11.x/installation/registry.html) y en `oc explain integrationplatform.spec.build`.
 
 Para ver el consumo en cualquier momento: **Terminal → Run Task… → Estado del proyecto**, o `bash scripts/status.sh`.
 
-Los recursos de los labs llevan `app.kubernetes.io/part-of=camel-k-workshop`. El Paso 0 borra Integrations, Deployments, Services, Routes, ConfigMaps y Secrets con esa etiqueta. No toca los CamelCatalog ni el Service `modelmesh-serving`, que vienen con el proyecto.
+Los recursos de los labs llevan `app.kubernetes.io/part-of=camel-k-workshop`. El Paso 0 borra Integrations, Deployments, Services, Routes, ConfigMaps y Secrets con esa etiqueta. No toca el IntegrationPlatform `camel-k`, los CamelCatalog ni el Service `modelmesh-serving`.
 
 ## Paso 1 — Hello
 
@@ -71,20 +71,20 @@ Los recursos de los labs llevan `app.kubernetes.io/part-of=camel-k-workshop`. El
 
 **Todas las opciones**
 
-- [timer](https://camel.apache.org/components/4.8.x/timer-component.html) y [log](https://camel.apache.org/components/4.8.x/log-component.html)
+- [timer](https://camel.apache.org/components/4.22.x/timer-component.html) y [log](https://camel.apache.org/components/4.22.x/log-component.html)
 - [YAML DSL](https://camel.apache.org/manual/yaml-dsl.html)
 - [Running an Integration](https://camel.apache.org/camel-k/next/running/running.html)
 - Traits usados: [container](https://camel.apache.org/camel-k/next/traits/container.html) (CPU, memoria, `runAsNonRoot`) y [logging](https://camel.apache.org/camel-k/next/traits/logging.html) si tu versión del manual lo publica; si no, `oc explain integration.spec.traits.logging`
 - Índice de traits del CRD instalado: `oc explain integration.spec.traits` y la [lista de traits](https://camel.apache.org/camel-k/next/traits/traits.html)
 - [API del Integration](https://camel.apache.org/camel-k/next/apis/camel-k.html)
 
-Anotá `phase` e `image` que imprime la tarea. Si el runtime no es 4.8.x, los links de componentes de arriba siguen siendo la referencia del catálogo 4.8.5 que este repo asume. El Paso 5 explica qué cambia si el runtime es 4.22.
+Anotá `phase` e `image` que imprime la tarea, y en el log la línea `Apache Camel 4.22.0`. Los enlaces de componentes de esta guía son de esa línea.
 
 ## Paso 2 — HTTP
 
 **Objetivo.** Exponer una ruta con `platform-http` y abrirla desde la Route de OpenShift.
 
-**Objetos.** Integration `http-hello`, Service y Route. El trait `ingress.auto` crea la Route. En este CRD el trait `route` está deprecado: `oc explain integration.spec.traits.route`.
+**Objetos.** Integration `http-hello`, Service y Route. En Camel K 2.11 el trait `ingress` solo corre con perfil Kubernetes. Este sandbox es OpenShift, así que el IntegrationPlatform fija `profile: OpenShift` y el trait `route` crea la Route con `tlsTermination: edge`. Está marcado como deprecado en el CRD, pero es el que publica el host `https://`. `oc explain integration.spec.traits.route` y [ingress](https://camel.apache.org/camel-k/2.11.x/traits/ingress.html).
 
 **Ruta.** [`labs/02-http/hello.camel.yaml`](labs/02-http/hello.camel.yaml). `platform-http:/hello` acepta solo GET, fija `Content-Type` y devuelve `Hola desde platform-http`.
 
@@ -96,10 +96,11 @@ Anotá `phase` e `image` que imprime la tarea. Si el runtime no es 4.8.x, los li
 
 **Todas las opciones**
 
-- [platform-http](https://camel.apache.org/components/4.8.x/platform-http-component.html): métodos, path, puerto y el consumer que dispara el trait de ingress
-- [ingress](https://camel.apache.org/camel-k/next/traits/ingress.html): `auto`, host, path y anotaciones
+- [platform-http](https://camel.apache.org/components/4.22.x/platform-http-component.html): métodos, path, puerto y el consumer que dispara el Service
+- [route](https://camel.apache.org/camel-k/2.11.x/traits/route.html): host y TLS. Es el trait que crea la Route con perfil OpenShift
+- [ingress](https://camel.apache.org/camel-k/2.11.x/traits/ingress.html): el equivalente cuando el perfil es Kubernetes
 - [container](https://camel.apache.org/camel-k/next/traits/container.html): `expose` y `port` (el puerto por defecto del HTTP de Camel es 8080)
-- [choice EIP](https://camel.apache.org/components/4.8.x/eips/choice-eip.html) y el resto de los EIP en el [índice 4.8.x](https://camel.apache.org/components/4.8.x/index.html)
+- [choice EIP](https://camel.apache.org/components/4.22.x/eips/choice-eip.html) y el resto de los EIP en el [índice 4.22.x](https://camel.apache.org/components/4.22.x/index.html)
 
 ## Paso 3 — Kafka
 
@@ -111,7 +112,7 @@ Anotá `phase` e `image` que imprime la tarea. Si el runtime no es 4.8.x, los li
 - Request 100m / 384Mi, limit 500m / 768Mi, heap `-Xmx384m`.
 - Integration `orders` con dos rutas en el mismo pod: un timer publica `pedido A-100` en el topic `orders` y un consumer lo loguea. El timer espera 20 segundos para darle tiempo al consumer a suscribirse.
 
-El listener es PLAINTEXT y solo se anuncia dentro del namespace (`advertised.listeners=PLAINTEXT://kafka:9092`). No lo expongas con una Route.
+El listener de clientes es PLAINTEXT y solo se anuncia dentro del namespace (`advertised.listeners=PLAINTEXT://kafka:9092`). El controller de KRaft escucha en `127.0.0.1:9093`: Kafka 3.9 rechaza `0.0.0.0` como dirección anunciada del controller. No lo expongas con una Route.
 
 **Tarea.** Paso 3 — Kafka. La tarea espera el rollout del broker y después la Integration.
 
@@ -121,9 +122,9 @@ El listener es PLAINTEXT y solo se anuncia dentro del namespace (`advertised.lis
 
 **Todas las opciones**
 
-- [kafka component](https://camel.apache.org/components/4.8.x/kafka-component.html): `brokers`, `groupId`, `autoOffsetReset`, consumidores y productores
+- [kafka component](https://camel.apache.org/components/4.22.x/kafka-component.html): `brokers`, `groupId`, `autoOffsetReset`, consumidores y productores
 - [KRaft](https://kafka.apache.org/documentation/#kraft): modo del broker de un nodo, sin ZooKeeper
-- [direct](https://camel.apache.org/components/4.8.x/direct-component.html) queda para el Paso 5, cuando una ruta llama a otra dentro del mismo proceso
+- [direct](https://camel.apache.org/components/4.22.x/direct-component.html) queda para el Paso 5, cuando una ruta llama a otra dentro del mismo proceso
 - [builder](https://camel.apache.org/camel-k/next/traits/builder.html): estrategias `routine` y `pod`, y los requests del build si alguna vez pasás a `pod`
 
 ## Paso 4 — Granite
@@ -142,7 +143,7 @@ Esa URL solo resuelve dentro del cluster. La Route del lab es la que abrís desd
 
 1. `GET /ask` usa la pregunta por defecto. `GET /ask?q=Hola` usa el query. Escribí `q` en texto plano, sin comillas dobles: el cuerpo JSON se arma con esa cadena.
 2. Arma un chat completion de la API compatible con OpenAI.
-3. POST al predictor con el Bearer y con el bean `sandboxSsl`.
+3. Borra los headers `CamelHttp*` y `Host` que llegaron con el GET, y hace POST al predictor con el Bearer, el bean `sandboxSsl` y `bridgeEndpoint=true`. Si no, el componente HTTP reenvía el path `/ask` o el host de la Route y el modelo responde 404. La opción está en [http](https://camel.apache.org/components/4.22.x/http-component.html).
 4. Si el HTTP es 200, devuelve `choices[0].message.content`. Si no, devuelve el código y el cuerpo.
 
 **TLS.** El predictor presenta un certificado firmado por la CA de servicio de OpenShift. Esa CA está en cada pod en `/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt`. [`platform/SandboxTrust.java`](platform/SandboxTrust.java) la carga en un `SSLContextParameters` registrado como `sandboxSsl`. No desactiva la verificación del nombre. El trait [mount](https://camel.apache.org/camel-k/next/traits/mount.html) sirve para montar otros ConfigMaps o Secrets; este archivo ya viene montado por OpenShift.
@@ -153,11 +154,11 @@ Esa URL solo resuelve dentro del cluster. La Route del lab es la que abrís desd
 
 **Kaoto.** `labs/04-granite/ask.camel.yaml`. El bean Java no aparece en el canvas; el `to` HTTPS sí.
 
-**Otra forma de llamar al modelo.** Este paso usa el componente HTTP para que el request quede visible en la ruta. Camel 4.8 también trae el cliente de chat y las herramientas de LangChain4j, que el catálogo del sandbox ya lista:
+**Otra forma de llamar al modelo.** Este paso usa el componente HTTP para que el request quede visible en la ruta. Camel 4.22 también trae el cliente de chat y las herramientas de LangChain4j:
 
-- [langchain4j-chat](https://camel.apache.org/components/4.8.x/langchain4j-chat-component.html)
-- [langchain4j-tools](https://camel.apache.org/components/4.8.x/langchain4j-tools-component.html)
-- [http](https://camel.apache.org/components/4.8.x/http-component.html), que es el que usa el `https:` de la ruta
+- [langchain4j-chat](https://camel.apache.org/components/4.22.x/langchain4j-chat-component.html)
+- [langchain4j-tools](https://camel.apache.org/components/4.22.x/langchain4j-tools-component.html)
+- [http](https://camel.apache.org/components/4.22.x/http-component.html), que es el que usa el `https:` de la ruta
 
 Para apuntar a Qwen o a Nemotron, cambiá el id y el host en el `setBody` y en el `to`. Los tres están Ready en `sandbox-shared-models`:
 
@@ -167,37 +168,38 @@ Para apuntar a Qwen o a Nemotron, cambiá el id y el host en el `setBody` y en e
 
 ## Paso 5 — MCP
 
-**Objetivo.** Exponer una herramienta Camel por JSON-RPC y usar el resultado como contexto de Granite.
+**Objetivo.** Publicar una ruta como herramienta MCP y usar el mismo estado como contexto de Granite.
 
-El catálogo 4.8.5 no incluye `camel-mcp-server`. Ese módulo llegó en Camel 4.22 y se documenta en [MCP Server](https://camel.apache.org/components/4.22.x/others/mcp-server.html): rutas `ai-tool` publicadas solas, sin armar el JSON-RPC a mano. Si el Paso 1 mostró Camel 4.22, ese es el camino nativo. Con 4.8.5 esta Integration implementa los métodos que alcanza para ver el protocolo en el canvas y probarlo con `curl`.
+Camel 4.22 trae [MCP Server](https://camel.apache.org/components/4.22.x/others/mcp-server.html). En Quarkus lo sirve la extensión [camel-quarkus-mcp-server](https://camel.apache.org/camel-quarkus/3.40.x/reference/extensions/mcp-server.html): no hay una ruta que arme el JSON-RPC. Las dependencias Maven `camel-quarkus-ai-tool` y `camel-quarkus-mcp-server` 3.39.0, más la property de build `quarkus.camel.mcp-server.tags=orders` (el trait `builder`, porque Quarkus la fija al construir), exponen las rutas `ai-tool` cuyo tag coincide. Van como `mvn:` porque el CamelCatalog que el operador valida en este sandbox es 3.15.3 y no conoce esos artifacts, aunque el kit que construye es Camel 4.22. `scripts/platform.sh` igual los registra en el catalogo del proyecto. El endpoint queda en `POST /mcp` ([streamable HTTP](https://modelcontextprotocol.io/specification/2024-11-05)). El cliente manda `Accept: application/json, text/event-stream` y, si el servidor lo devuelve, el header `Mcp-Session-Id`.
 
-No es una sesión streamable HTTP completa (no negocia `Mcp-Session-Id` ni SSE). Es un POST con cuerpo JSON-RPC, el subconjunto [initialize, tools/list y tools/call de la spec 2024-11-05](https://modelcontextprotocol.io/specification/2024-11-05).
-
-**Rutas.** [`labs/05-mcp/mcp.camel.yaml`](labs/05-mcp/mcp.camel.yaml), las tres en el mismo pod.
+**Rutas.** [`labs/05-mcp/mcp.camel.yaml`](labs/05-mcp/mcp.camel.yaml)
 
 - `direct:order-status` devuelve un texto fijo para `A-100`, `B-200` y `C-300`.
-- `platform-http:/mcp` hace `unmarshal` JSON y elige el método.
-- `platform-http:/ask` llama `order-status` (por defecto `A-100`, o `?orderId=B-200`) y le pide a Granite una frase.
+- `ai-tool:order-status` (tag `orders`) toma `orderId` del header y llama a `direct:order-status`. Esa es la herramienta MCP.
+- `platform-http:/ask` llama la misma lógica (por defecto `A-100`, o `?orderId=B-200`) y le pide a Granite una frase.
 
 **Tarea.** Paso 5 — MCP. Imprime `initialize`, `tools/list`, `tools/call` de `A-100` y el `GET /ask?orderId=B-200`.
 
 **Consola.** La Route sirve `/mcp` y `/ask` en el mismo host. Topology muestra un Deployment, `mcp`.
 
-**Kaoto.** `labs/05-mcp/mcp.camel.yaml`. Las tres rutas aparecen en el archivo.
+**Kaoto.** `labs/05-mcp/mcp.camel.yaml`. El canvas muestra las tres rutas. El servidor MCP no es una ruta: sale de las dependencias Maven y de `quarkus.camel.mcp-server.tags` en el trait `builder`.
 
 **Todas las opciones**
 
-- [direct](https://camel.apache.org/components/4.8.x/direct-component.html) para llamar una ruta desde otra
-- [choice](https://camel.apache.org/components/4.8.x/eips/choice-eip.html) y [unmarshal JSON](https://camel.apache.org/components/4.8.x/dataformats/json-dataformat.html)
+- [ai-tool](https://camel.apache.org/components/4.22.x/ai-tool-component.html) y [MCP Server](https://camel.apache.org/components/4.22.x/others/mcp-server.html)
+- [camel-quarkus-mcp-server](https://camel.apache.org/camel-quarkus/3.40.x/reference/extensions/mcp-server.html): `quarkus.camel.mcp-server.tags` y `quarkus.mcp.server.http.root-path`
+- [direct](https://camel.apache.org/components/4.22.x/direct-component.html) para compartir la lógica entre la herramienta y `/ask`
 - [Spec MCP 2024-11-05](https://modelcontextprotocol.io/specification/2024-11-05)
-- [camel-mcp-server en 4.22](https://camel.apache.org/components/4.22.x/others/mcp-server.html) y el anuncio [Camel Routes as AI Tools](https://camel.apache.org/blog/2026/08/camel-ai-tools-mcp-422/)
-- [langchain4j-tools](https://camel.apache.org/components/4.8.x/langchain4j-tools-component.html) si preferís que el modelo elija la herramienta dentro de Camel, en lugar de orquestarlo en la ruta
+- [Camel Routes as AI Tools](https://camel.apache.org/blog/2026/08/camel-ai-tools-mcp-422/)
+- [langchain4j-tools](https://camel.apache.org/components/4.22.x/langchain4j-tools-component.html) si preferís que el modelo elija la herramienta dentro de Camel, en lugar de orquestarlo en la ruta
 
 ## Si algo no levanta
 
 **Pod Pending.** `oc describe pod <nombre>` y la cuota: `oc get resourcequota compute-deploy`. Un workspace más el broker más una Integration entra en la cuota de referencia. Si hay otro Deployment tuyo, corré el Paso 0 o **Dev Spaces: Stop Workspace** desde la barra de estado antes de volver a entrar.
 
-**Integration en Error.** `oc describe integration <nombre>` y los logs del pod. El primer síntoma suele estar en `status.conditions` y en el build. La referencia de fases está en [Running an Integration](https://camel.apache.org/camel-k/next/running/running.html).
+**Integration en Error.** `oc describe integration <nombre>` y `oc describe build.camel.apache.org`. El mensaje queda en `status.error` del Build. La referencia de fases está en [Running an Integration](https://camel.apache.org/camel-k/next/running/running.html).
+
+**ImagePullBackOff.** La imagen del kit se publicó en `camel-k-operator`. Volvé a correr el paso: `scripts/platform.sh` deja el IntegrationPlatform `camel-k` en tu proyecto para que el ImageStream sea local. No borres ese IntegrationPlatform.
 
 **401 del modelo.** El token venció. Volvé a correr el Paso 4 o el 5. La tarea recrea el Secret con `oc whoami -t`.
 
@@ -214,7 +216,8 @@ Camel K
 - [Running an Integration](https://camel.apache.org/camel-k/next/running/running.html)
 - [Traits](https://camel.apache.org/camel-k/next/traits/traits.html)
 - [container](https://camel.apache.org/camel-k/next/traits/container.html)
-- [ingress](https://camel.apache.org/camel-k/next/traits/ingress.html)
+- [route](https://camel.apache.org/camel-k/2.11.x/traits/route.html)
+- [ingress](https://camel.apache.org/camel-k/2.11.x/traits/ingress.html)
 - [builder](https://camel.apache.org/camel-k/next/traits/builder.html)
 - [camel](https://camel.apache.org/camel-k/next/traits/camel.html) (properties y `runtimeVersion`)
 - [environment](https://camel.apache.org/camel-k/next/traits/environment.html)
@@ -222,20 +225,20 @@ Camel K
 - [API de Integration](https://camel.apache.org/camel-k/next/apis/camel-k.html)
 - En el cluster: `oc explain integration.spec.traits`
 
-Camel 4.8, la línea del catálogo de referencia
+Camel 4.22, la línea que construye el operador del sandbox
 
-- [Índice de componentes](https://camel.apache.org/components/4.8.x/index.html)
+- [Índice de componentes](https://camel.apache.org/components/4.22.x/index.html)
 - [YAML DSL](https://camel.apache.org/manual/yaml-dsl.html)
-- [timer](https://camel.apache.org/components/4.8.x/timer-component.html)
-- [log](https://camel.apache.org/components/4.8.x/log-component.html)
-- [platform-http](https://camel.apache.org/components/4.8.x/platform-http-component.html)
-- [direct](https://camel.apache.org/components/4.8.x/direct-component.html)
-- [kafka](https://camel.apache.org/components/4.8.x/kafka-component.html)
-- [http](https://camel.apache.org/components/4.8.x/http-component.html)
-- [langchain4j-chat](https://camel.apache.org/components/4.8.x/langchain4j-chat-component.html)
-- [langchain4j-tools](https://camel.apache.org/components/4.8.x/langchain4j-tools-component.html)
-- [choice](https://camel.apache.org/components/4.8.x/eips/choice-eip.html)
-- [JSON data format](https://camel.apache.org/components/4.8.x/dataformats/json-dataformat.html)
+- [timer](https://camel.apache.org/components/4.22.x/timer-component.html)
+- [log](https://camel.apache.org/components/4.22.x/log-component.html)
+- [platform-http](https://camel.apache.org/components/4.22.x/platform-http-component.html)
+- [direct](https://camel.apache.org/components/4.22.x/direct-component.html)
+- [kafka](https://camel.apache.org/components/4.22.x/kafka-component.html)
+- [http](https://camel.apache.org/components/4.22.x/http-component.html)
+- [langchain4j-chat](https://camel.apache.org/components/4.22.x/langchain4j-chat-component.html)
+- [langchain4j-tools](https://camel.apache.org/components/4.22.x/langchain4j-tools-component.html)
+- [choice](https://camel.apache.org/components/4.22.x/eips/choice-eip.html)
+- [JSON data format](https://camel.apache.org/components/4.22.x/dataformats/json-dataformat.html)
 
 Kaoto, Dev Spaces y OpenShift
 

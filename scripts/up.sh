@@ -50,6 +50,7 @@ else
 fi
 
 echo "Proyecto activo: $(oc project -q)"
+bash "$ROOT/scripts/platform.sh"
 bash "$ROOT/scripts/down.sh"
 "$PYTHON" "$ROOT/scripts/sync.py"
 
@@ -76,7 +77,7 @@ fi
 oc apply -f "$ROOT/labs/$LAB/integration.yaml"
 
 echo "Esperando a que integration/${INTEGRATION} quede Ready (el primer build puede tardar varios minutos)..."
-if ! oc wait --for=condition=Ready "integration/${INTEGRATION}" --timeout=900s; then
+if ! oc wait --for=condition=Ready "integration/${INTEGRATION}" --timeout=1200s; then
   echo "La Integration no llego a Ready."
   oc describe "integration/${INTEGRATION}" || true
   oc get pods -l "camel.apache.org/integration=${INTEGRATION}" -o wide || true
@@ -135,18 +136,41 @@ fi
 
 if [[ "$LAB" == "05-mcp" ]]; then
   echo
+  HDR="$(mktemp)"
   echo "-- initialize --"
-  curl -kfsS --max-time 60 -H 'Content-Type: application/json' \
+  curl -kfsS --max-time 60 -D "$HDR" \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/json, text/event-stream' \
     -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"workshop","version":"0.1.0"}}}' \
     "https://${HOST}/mcp"
   echo
+  SID="$(awk 'tolower($1)=="mcp-session-id:" {print $2}' "$HDR" | tr -d '\r')"
+  rm -f "$HDR"
+  SESSION=()
+  if [[ -n "$SID" ]]; then
+    echo "Mcp-Session-Id: ${SID}"
+    SESSION=(-H "Mcp-Session-Id: ${SID}")
+  fi
+  echo "-- notifications/initialized --"
+  curl -ksS --max-time 60 -o /dev/null -w "HTTP %{http_code}\n" \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/json, text/event-stream' \
+    "${SESSION[@]}" \
+    -d '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
+    "https://${HOST}/mcp" || true
   echo "-- tools/list --"
-  curl -kfsS --max-time 60 -H 'Content-Type: application/json' \
+  curl -kfsS --max-time 60 \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/json, text/event-stream' \
+    "${SESSION[@]}" \
     -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
     "https://${HOST}/mcp"
   echo
   echo "-- tools/call --"
-  curl -kfsS --max-time 60 -H 'Content-Type: application/json' \
+  curl -kfsS --max-time 60 \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/json, text/event-stream' \
+    "${SESSION[@]}" \
     -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"order-status","arguments":{"orderId":"A-100"}}}' \
     "https://${HOST}/mcp"
   echo
