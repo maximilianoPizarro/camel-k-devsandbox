@@ -1,0 +1,39 @@
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: orders
+  labels:
+    app.kubernetes.io/part-of: camel-k-workshop
+    app.kubernetes.io/name: orders
+    workshop.camel-k/lab: "03-kafka"
+spec:
+  flows:
+    # >>> flows
+    # Paso 3. Las dos rutas viven en el mismo Integration. El broker es el Service kafka:9092.
+    - route:
+        id: publish-orders
+        description: Publica un pedido en el topic orders
+        from:
+          uri: "timer:orders?period=15000&delay=20000"
+          steps:
+            - setBody:
+                constant: "pedido A-100"
+            - to: "kafka:orders?brokers=kafka:9092"
+            - log: "publicado ${body}"
+    - route:
+        id: consume-orders
+        description: Lee el topic orders y lo escribe en el log
+        from:
+          uri: "kafka:orders?brokers=kafka:9092&groupId=camel-k-workshop&autoOffsetReset=earliest"
+          steps:
+            - log: "pedido recibido ${body}"
+    # <<< flows
+  traits:
+    container:
+      requestCPU: "50m"
+      requestMemory: "192Mi"
+      limitCPU: "400m"
+      limitMemory: "512Mi"
+      runAsNonRoot: true
+    logging:
+      level: INFO

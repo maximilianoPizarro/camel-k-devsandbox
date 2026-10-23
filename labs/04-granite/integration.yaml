@@ -1,0 +1,128 @@
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: granite
+  labels:
+    app.kubernetes.io/part-of: camel-k-workshop
+    app.kubernetes.io/name: granite
+    workshop.camel-k/lab: "04-granite"
+spec:
+  sources:
+    # >>> sources
+    - name: SandboxTrust.java
+      content: |
+        import java.io.ByteArrayInputStream;
+        import java.io.OutputStream;
+        import java.nio.charset.StandardCharsets;
+        import java.nio.file.Files;
+        import java.nio.file.Path;
+        import java.security.KeyStore;
+        import java.security.cert.Certificate;
+        import java.security.cert.CertificateFactory;
+
+        import org.apache.camel.BindToRegistry;
+        import org.apache.camel.support.jsse.KeyStoreParameters;
+        import org.apache.camel.support.jsse.SSLContextParameters;
+        import org.apache.camel.support.jsse.TrustManagersParameters;
+
+        /**
+         * Truststore for the OpenShift service CA mounted in every pod at
+         * /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt.
+         * The shared OpenShift AI predictors present a certificate signed by that CA.
+         */
+        @BindToRegistry("sandboxSsl")
+        public class SandboxTrust extends SSLContextParameters {
+
+            public SandboxTrust() {
+                try {
+                    String pem = Files.readString(Path.of("/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt"));
+                    CertificateFactory factory = CertificateFactory.getInstance("X.509");
+                    char[] password = "changeit".toCharArray();
+                    KeyStore store = KeyStore.getInstance("PKCS12");
+                    store.load(null, password);
+                    int index = 0;
+                    for (Certificate certificate : factory.generateCertificates(
+                            new ByteArrayInputStream(pem.getBytes(StandardCharsets.UTF_8)))) {
+                        store.setCertificateEntry("service-ca-" + index++, certificate);
+                    }
+                    Path truststore = Path.of("/tmp/service-ca.p12");
+                    try (OutputStream output = Files.newOutputStream(truststore)) {
+                        store.store(output, password);
+                    }
+                    KeyStoreParameters parameters = new KeyStoreParameters();
+                    parameters.setResource(truststore.toUri().toString());
+                    parameters.setType("PKCS12");
+                    parameters.setPassword("changeit");
+                    TrustManagersParameters trust = new TrustManagersParameters();
+                    trust.setKeyStore(parameters);
+                    setTrustManagers(trust);
+                } catch (Exception exception) {
+                    throw new IllegalStateException("No se pudo cargar service-ca.crt", exception);
+                }
+            }
+        }
+
+    # <<< sources
+  flows:
+    # >>> flows
+    # Paso 4. GET /ask llama a Granite en OpenShift AI. El query q reemplaza la pregunta por defecto.
+    # El bean sandboxSsl esta en platform/SandboxTrust.java y confia en la CA de servicio de OpenShift.
+    - route:
+        id: ask-granite
+        description: Pregunta a Granite y devuelve el texto de la respuesta
+        from:
+          uri: "platform-http:/ask?httpMethodRestrict=GET"
+          steps:
+            - choice:
+                when:
+                  - simple: "${header.q} != null && ${header.q} != ''"
+                    steps:
+                      - setVariable:
+                          name: question
+                          simple: "${header.q}"
+                otherwise:
+                  steps:
+                    - setVariable:
+                        name: question
+                        constant: "En una frase, que modelo de OpenShift AI sos?"
+            - setHeader:
+                name: Authorization
+                simple: "Bearer ${env:LLM_TOKEN}"
+            - setHeader:
+                name: Content-Type
+                constant: application/json
+            - setBody:
+                simple: '{"model":"isvc-granite-31-8b-fp8","messages":[{"role":"user","content":"${variable.question}"}]}'
+            - to: "https://isvc-granite-31-8b-fp8-predictor.sandbox-shared-models.svc.cluster.local:8443/v1/chat/completions?httpMethod=POST&sslContextParameters=#sandboxSsl&throwExceptionOnFailure=false&responseTimeout=120000"
+            - log: "modelo HTTP ${header.CamelHttpResponseCode}"
+            - choice:
+                when:
+                  - simple: "${header.CamelHttpResponseCode} == 200"
+                    steps:
+                      - unmarshal:
+                          json: {}
+                      - setBody:
+                          simple: "${body[choices][0][message][content]}"
+                otherwise:
+                  steps:
+                    - setBody:
+                        simple: "El modelo respondio HTTP ${header.CamelHttpResponseCode}: ${body}"
+            - setHeader:
+                name: Content-Type
+                constant: "text/plain; charset=utf-8"
+    # <<< flows
+  traits:
+    environment:
+      vars:
+        - LLM_TOKEN=secret:sandbox-llm-token/token
+    ingress:
+      auto: true
+    container:
+      expose: true
+      requestCPU: "50m"
+      requestMemory: "256Mi"
+      limitCPU: "500m"
+      limitMemory: "640Mi"
+      runAsNonRoot: true
+    logging:
+      level: INFO

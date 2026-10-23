@@ -1,0 +1,10 @@
+# Paso 1. Kaoto abre este archivo. El timer dispara la ruta y el log queda en el pod.
+- route:
+    id: hello
+    description: Timer que escribe un saludo en el log del pod
+    from:
+      uri: "timer:tick?period=10000"
+      steps:
+        - setBody:
+            constant: "Hola desde Camel K en Developer Sandbox"
+        - log: "hello ${body}"

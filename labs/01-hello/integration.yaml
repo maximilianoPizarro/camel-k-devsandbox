@@ -1,0 +1,31 @@
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: hello
+  labels:
+    app.kubernetes.io/part-of: camel-k-workshop
+    app.kubernetes.io/name: hello
+    workshop.camel-k/lab: "01-hello"
+spec:
+  flows:
+    # >>> flows
+    # Paso 1. Kaoto abre este archivo. El timer dispara la ruta y el log queda en el pod.
+    - route:
+        id: hello
+        description: Timer que escribe un saludo en el log del pod
+        from:
+          uri: "timer:tick?period=10000"
+          steps:
+            - setBody:
+                constant: "Hola desde Camel K en Developer Sandbox"
+            - log: "hello ${body}"
+    # <<< flows
+  traits:
+    container:
+      requestCPU: "50m"
+      requestMemory: "192Mi"
+      limitCPU: "300m"
+      limitMemory: "384Mi"
+      runAsNonRoot: true
+    logging:
+      level: INFO

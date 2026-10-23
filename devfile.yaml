@@ -1,0 +1,87 @@
+schemaVersion: 2.2.2
+metadata:
+  name: camel-k-workshop
+  displayName: Camel K en Developer Sandbox
+  description: Labs de Camel K para OpenShift Dev Spaces. Cada paso es una tarea del workspace.
+  language: Java
+  projectType: camel-k
+  tags:
+    - OpenShift
+    - Camel
+    - Kaoto
+  attributes:
+    controller.devfile.io/storage-type: ephemeral
+components:
+  - name: tools
+    container:
+      image: quay.io/devfile/universal-developer-image:ubi9-latest
+      memoryRequest: 512Mi
+      memoryLimit: 2Gi
+      cpuRequest: 200m
+      cpuLimit: "1"
+      mountSources: true
+      sourceMapping: /projects
+commands:
+  - id: paso-0-limpiar
+    exec:
+      component: tools
+      commandLine: bash scripts/down.sh
+      workingDir: ${PROJECT_SOURCE}
+      label: Paso 0 — Limpiar el lab activo
+      group:
+        kind: run
+        isDefault: false
+  - id: paso-1-hello
+    exec:
+      component: tools
+      commandLine: bash scripts/up.sh 01-hello
+      workingDir: ${PROJECT_SOURCE}
+      label: Paso 1 — Hello
+      group:
+        kind: run
+        isDefault: false
+  - id: paso-2-http
+    exec:
+      component: tools
+      commandLine: bash scripts/up.sh 02-http
+      workingDir: ${PROJECT_SOURCE}
+      label: Paso 2 — HTTP
+      group:
+        kind: run
+        isDefault: false
+  - id: paso-3-kafka
+    exec:
+      component: tools
+      commandLine: bash scripts/up.sh 03-kafka
+      workingDir: ${PROJECT_SOURCE}
+      label: Paso 3 — Kafka
+      group:
+        kind: run
+        isDefault: false
+  - id: paso-4-granite
+    exec:
+      component: tools
+      commandLine: bash scripts/up.sh 04-granite
+      workingDir: ${PROJECT_SOURCE}
+      label: Paso 4 — Granite
+      group:
+        kind: run
+        isDefault: false
+  - id: paso-5-mcp
+    exec:
+      component: tools
+      commandLine: bash scripts/up.sh 05-mcp
+      workingDir: ${PROJECT_SOURCE}
+      label: Paso 5 — MCP
+      group:
+        kind: run
+        isDefault: false
+  - id: estado
+    exec:
+      component: tools
+      commandLine: bash scripts/status.sh
+      workingDir: ${PROJECT_SOURCE}
+      label: Estado del proyecto
+      group:
+        kind: test
+        isDefault: false

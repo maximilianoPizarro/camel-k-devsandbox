@@ -1,0 +1,37 @@
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: http-hello
+  labels:
+    app.kubernetes.io/part-of: camel-k-workshop
+    app.kubernetes.io/name: http-hello
+    workshop.camel-k/lab: "02-http"
+spec:
+  flows:
+    # >>> flows
+    # Paso 2. GET /hello responde en texto plano. La Route de OpenShift publica el servicio.
+    - route:
+        id: http-hello
+        description: GET /hello devuelve un saludo
+        from:
+          uri: "platform-http:/hello?httpMethodRestrict=GET"
+          steps:
+            - log: "GET /hello"
+            - setHeader:
+                name: Content-Type
+                constant: "text/plain; charset=utf-8"
+            - setBody:
+                constant: "Hola desde platform-http"
+    # <<< flows
+  traits:
+    ingress:
+      auto: true
+    container:
+      expose: true
+      requestCPU: "50m"
+      requestMemory: "192Mi"
+      limitCPU: "300m"
+      limitMemory: "384Mi"
+      runAsNonRoot: true
+    logging:
+      level: INFO

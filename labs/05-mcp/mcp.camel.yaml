@@ -1,0 +1,123 @@
+# Paso 5. /mcp habla JSON-RPC (initialize, tools/list, tools/call).
+# /ask ejecuta la herramienta order-status y le pide a Granite que redacte la frase.
+- route:
+    id: order-status
+    description: Estado de un pedido fijo del workshop
+    from:
+      uri: "direct:order-status"
+      steps:
+        - choice:
+            when:
+              - simple: "${variable.orderId} == 'A-100'"
+                steps:
+                  - setBody:
+                      constant: "Pedido A-100 enviado desde Cordoba"
+              - simple: "${variable.orderId} == 'B-200'"
+                steps:
+                  - setBody:
+                      constant: "Pedido B-200 en preparacion en Rosario"
+              - simple: "${variable.orderId} == 'C-300'"
+                steps:
+                  - setBody:
+                      constant: "Pedido C-300 entregado en Mendoza"
+            otherwise:
+              steps:
+                - setBody:
+                    simple: "Pedido ${variable.orderId} no encontrado. Proba A-100, B-200 o C-300"
+- route:
+    id: mcp
+    description: Servidor MCP minimo sobre platform-http
+    from:
+      uri: "platform-http:/mcp?httpMethodRestrict=POST"
+      steps:
+        - unmarshal:
+            json: {}
+        - setVariable:
+            name: rpcId
+            simple: "${body[id]}"
+        - setVariable:
+            name: rpcMethod
+            simple: "${body[method]}"
+        - choice:
+            when:
+              - simple: "${variable.rpcMethod} == 'notifications/initialized'"
+                steps:
+                  - setHeader:
+                      name: CamelHttpResponseCode
+                      constant: "202"
+                  - setBody:
+                      constant: ""
+              - simple: "${variable.rpcMethod} == 'ping'"
+                steps:
+                  - setBody:
+                      simple: '{"jsonrpc":"2.0","id":${variable.rpcId},"result":{}}'
+              - simple: "${variable.rpcMethod} == 'initialize'"
+                steps:
+                  - setBody:
+                      simple: '{"jsonrpc":"2.0","id":${variable.rpcId},"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":false}},"serverInfo":{"name":"camel-k-workshop","version":"0.1.0"}}}'
+              - simple: "${variable.rpcMethod} == 'tools/list'"
+                steps:
+                  - setBody:
+                      simple: '{"jsonrpc":"2.0","id":${variable.rpcId},"result":{"tools":[{"name":"order-status","description":"Estado de un pedido del catalogo del workshop","inputSchema":{"type":"object","properties":{"orderId":{"type":"string","description":"Id del pedido, por ejemplo A-100"}},"required":["orderId"]}}]}}'
+              - simple: "${variable.rpcMethod} == 'tools/call'"
+                steps:
+                  - setVariable:
+                      name: orderId
+                      simple: "${body[params][arguments][orderId]}"
+                  - to: "direct:order-status"
+                  - setBody:
+                      simple: '{"jsonrpc":"2.0","id":${variable.rpcId},"result":{"content":[{"type":"text","text":"${body}"}],"isError":false}}'
+            otherwise:
+              steps:
+                - setBody:
+                    simple: '{"jsonrpc":"2.0","id":${variable.rpcId},"error":{"code":-32601,"message":"Method not found"}}'
+        - setHeader:
+            name: Content-Type
+            constant: application/json
+- route:
+    id: ask
+    description: Llama la herramienta y le pide a Granite una frase
+    from:
+      uri: "platform-http:/ask?httpMethodRestrict=GET"
+      steps:
+        - choice:
+            when:
+              - simple: "${header.orderId} != null && ${header.orderId} != ''"
+                steps:
+                  - setVariable:
+                      name: orderId
+                      simple: "${header.orderId}"
+            otherwise:
+              steps:
+                - setVariable:
+                    name: orderId
+                    constant: "A-100"
+        - to: "direct:order-status"
+        - setVariable:
+            name: question
+            simple: "Redacta en una sola frase en espanol el estado de este pedido: ${body}"
+        - setHeader:
+            name: Authorization
+            simple: "Bearer ${env:LLM_TOKEN}"
+        - setHeader:
+            name: Content-Type
+            constant: application/json
+        - setBody:
+            simple: '{"model":"isvc-granite-31-8b-fp8","messages":[{"role":"user","content":"${variable.question}"}]}'
+        - to: "https://isvc-granite-31-8b-fp8-predictor.sandbox-shared-models.svc.cluster.local:8443/v1/chat/completions?httpMethod=POST&sslContextParameters=#sandboxSsl&throwExceptionOnFailure=false&responseTimeout=120000"
+        - log: "modelo HTTP ${header.CamelHttpResponseCode}"
+        - choice:
+            when:
+              - simple: "${header.CamelHttpResponseCode} == 200"
+                steps:
+                  - unmarshal:
+                      json: {}
+                  - setBody:
+                      simple: "${body[choices][0][message][content]}"
+            otherwise:
+              steps:
+                - setBody:
+                    simple: "El modelo respondio HTTP ${header.CamelHttpResponseCode}: ${body}"
+        - setHeader:
+            name: Content-Type
+            constant: "text/plain; charset=utf-8"

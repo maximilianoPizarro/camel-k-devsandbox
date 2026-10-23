@@ -1,0 +1,45 @@
+# Paso 4. GET /ask llama a Granite en OpenShift AI. El query q reemplaza la pregunta por defecto.
+# El bean sandboxSsl esta en platform/SandboxTrust.java y confia en la CA de servicio de OpenShift.
+- route:
+    id: ask-granite
+    description: Pregunta a Granite y devuelve el texto de la respuesta
+    from:
+      uri: "platform-http:/ask?httpMethodRestrict=GET"
+      steps:
+        - choice:
+            when:
+              - simple: "${header.q} != null && ${header.q} != ''"
+                steps:
+                  - setVariable:
+                      name: question
+                      simple: "${header.q}"
+            otherwise:
+              steps:
+                - setVariable:
+                    name: question
+                    constant: "En una frase, que modelo de OpenShift AI sos?"
+        - setHeader:
+            name: Authorization
+            simple: "Bearer ${env:LLM_TOKEN}"
+        - setHeader:
+            name: Content-Type
+            constant: application/json
+        - setBody:
+            simple: '{"model":"isvc-granite-31-8b-fp8","messages":[{"role":"user","content":"${variable.question}"}]}'
+        - to: "https://isvc-granite-31-8b-fp8-predictor.sandbox-shared-models.svc.cluster.local:8443/v1/chat/completions?httpMethod=POST&sslContextParameters=#sandboxSsl&throwExceptionOnFailure=false&responseTimeout=120000"
+        - log: "modelo HTTP ${header.CamelHttpResponseCode}"
+        - choice:
+            when:
+              - simple: "${header.CamelHttpResponseCode} == 200"
+                steps:
+                  - unmarshal:
+                      json: {}
+                  - setBody:
+                      simple: "${body[choices][0][message][content]}"
+            otherwise:
+              steps:
+                - setBody:
+                    simple: "El modelo respondio HTTP ${header.CamelHttpResponseCode}: ${body}"
+        - setHeader:
+            name: Content-Type
+            constant: "text/plain; charset=utf-8"

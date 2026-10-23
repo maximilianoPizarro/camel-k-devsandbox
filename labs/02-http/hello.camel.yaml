@@ -1,0 +1,13 @@
+# Paso 2. GET /hello responde en texto plano. La Route de OpenShift publica el servicio.
+- route:
+    id: http-hello
+    description: GET /hello devuelve un saludo
+    from:
+      uri: "platform-http:/hello?httpMethodRestrict=GET"
+      steps:
+        - log: "GET /hello"
+        - setHeader:
+            name: Content-Type
+            constant: "text/plain; charset=utf-8"
+        - setBody:
+            constant: "Hola desde platform-http"
