@@ -26,15 +26,16 @@ El operador Camel K ya está instalado en el sandbox y observa tu proyecto. Esto
 
 ### Misma ruta, en el workspace (Camel JBang)
 
-| Tarea | Qué corre | Qué mirar |
+JBang y el Camel CLI 4.22.0 se instalan solos al crear el workspace (evento `postStart` del devfile). El comando `camel` queda disponible en todas las terminales.
+
+| Tarea | Comando | Qué mirar |
 | --- | --- | --- |
-| Local — Instalar Camel JBang | JBang y el Camel CLI 4.22.0 en el home del workspace | `camel version` |
-| Local — Hello | `labs/01-hello/hello.camel.yaml` en el contenedor | Log en la terminal de la tarea |
-| Local — HTTP | La ruta HTTP en el puerto **8081** | `curl` a `http://127.0.0.1:8081/hello` |
-| Local — Kafka | Solo el Deployment `kafka` + `orders.camel.yaml` en JBang | Log `pedido recibido pedido A-100` |
-| Local — Granite | `ask.camel.yaml` + `SandboxTrust.java` en 8081 | Texto del modelo en `/ask` |
-| Local — MCP | `mcp.camel.yaml` con runtime Quarkus en 8081 | `tools/list`, `tools/call` y `/ask` |
-| Local — Detener | Para el proceso JBang | `camel ps` vacío |
+| Local — Hello | `camel run labs/01-hello/hello.camel.yaml` | Log en la terminal |
+| Local — HTTP | `camel run labs/02-http/hello.camel.yaml --port=8081` | `curl http://127.0.0.1:8081/hello` desde otra terminal |
+| Local — Kafka | `oc apply` del broker + `camel run labs/03-kafka/orders.camel.yaml` | Log `pedido recibido pedido A-100` |
+| Local — Granite | `export LLM_TOKEN=$(oc whoami -t)` + `camel run labs/04-granite/ask.camel.yaml platform/SandboxTrust.java --port=8081` | `curl http://127.0.0.1:8081/ask` desde otra terminal |
+| Local — MCP | `camel run labs/05-mcp/mcp.camel.yaml platform/SandboxTrust.java --runtime=quarkus --port=8081` + deps | `curl http://127.0.0.1:8081/mcp` y `/ask` desde otra terminal |
+| Local — Detener | `camel stop` | `camel ps` vacío |
 
 El workspace de Dev Spaces también es un pod de tu proyecto y cuenta en la misma cuota. El devfile pide 512Mi / 200m de request y limita el contenedor a 4Gi / 2 CPU (el IDE más Camel JBang).
 
@@ -51,7 +52,7 @@ Ningún paso corre solo al abrir el workspace. Elegís la tarea cuando querés a
 
 ## Tres vistas del mismo lab
 
-**La tarea.** Los Pasos 1 a 5 corren `scripts/up.sh`. Ese script borra el lab anterior, sincroniza el YAML de Kaoto con el Integration y hace `oc apply`. La salida te dice el nombre del Deployment y, si hay HTTP, la URL de la Route. Las tareas **Local — …** corren el mismo `*.camel.yaml` con Camel JBang dentro del workspace (`scripts/local.sh`).
+**La tarea.** Los Pasos 1 a 5 corren `scripts/up.sh`. Ese script borra el lab anterior, sincroniza el YAML de Kaoto con el Integration y hace `oc apply`. La salida te dice el nombre del Deployment y, si hay HTTP, la URL de la Route. Las tareas **Local — …** corren el mismo `*.camel.yaml` con `camel run` dentro del workspace. El comando aparece directo en el [`devfile.yaml`](devfile.yaml) para que lo copies a cualquier terminal.
 
 **La consola de OpenShift.** En la barra de estado del IDE, **Dev Spaces → Open OpenShift Console**. Cambiá a la perspectiva **Developer**, elegí tu proyecto y abrí **Topology**. Ahí ves el Deployment de la Integration, el pod y la flecha de la Route. Los logs están en el pod. La vista está documentada en [Viewing application composition using the Topology view](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/building_applications/odc-viewing-application-composition-using-topology-view).
 
@@ -66,7 +67,7 @@ El archivo `*.camel.yaml` de cada lab es el que abre Kaoto. Hay dos formas de ej
 1. **Camel JBang en el workspace** (tareas **Local — …**). El proceso corre en el contenedor de Dev Spaces. No crea un Integration. Hello y HTTP no necesitan el cluster. Kafka usa solo el Deployment `kafka`. Granite y MCP llaman al predictor de OpenShift AI desde el workspace. El HTTP local usa el puerto **8081** porque el IDE ya ocupa el 8080.
 2. **Operador Camel K** (Pasos 1 a 5). `sync.py` copia el flujo al Integration y el operador construye la imagen en tu proyecto.
 
-La instalación del CLI está en [Camel CLI — Getting Started](https://camel.apache.org/manual/camel-jbang-getting-started.html). Este workshop fija la versión 4.22.0 como en [Installation Options](https://camel.apache.org/manual/camel-jbang-installation.html). Las opciones de `camel run` están en [camel run](https://camel.apache.org/manual/jbang-commands/camel-jbang-run.html). Corré primero **Local — Instalar Camel JBang**. El home del workspace es efímero: si recreás el workspace, volvé a instalar.
+La instalación del CLI está en [Camel CLI — Getting Started](https://camel.apache.org/manual/camel-jbang-getting-started.html). Este workshop fija la versión 4.22.0 como en [Installation Options](https://camel.apache.org/manual/camel-jbang-installation.html). Las opciones de `camel run` están en [camel run](https://camel.apache.org/manual/jbang-commands/camel-jbang-run.html). El workspace instala JBang y el Camel CLI al arrancar (evento `postStart` del devfile). El home es efímero: si recreás el workspace, se vuelve a instalar solo.
 
 ## Cuota y por qué hay un solo lab vivo
 
@@ -74,7 +75,7 @@ En el sandbox de referencia la cuota de pods largos es 3 CPU de request y 30Gi d
 
 Sin un `IntegrationPlatform` en tu proyecto, el operador publica la imagen del kit en el namespace `camel-k-operator`. Ese registry no acepta el pull de tu ServiceAccount, y el pod queda en `ImagePullBackOff`. [`scripts/platform.sh`](scripts/platform.sh) crea el IntegrationPlatform `camel-k` para que la imagen quede en un ImageStream de tu proyecto. El build usa la estrategia `routine` (corre dentro del operador) y publica con `S2I`. Un pod builder no sirve en este sandbox: el usuario no puede delegar `builds/status`, y sin eso el builder no puede cerrar el Build. `up.sh` corre ese script antes de cada lab. El primer build baja dependencias Maven y puede tardar varios minutos. No crea un pod de build en tu cuota.
 
-El workspace, un Integration y, en el paso 3, el broker entran juntos. Igual cada paso borra al anterior para no acumular Routes, pods ni el broker mientras avanzás. Las tareas Local también bajan el lab del operador antes de arrancar, para no sumar dos JVMs de Camel a la cuota. La regla de cuota por proyecto está en [Resource quotas](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/working_with_quotas/quotas-setting-per-project-quotas). El artículo [Try Camel K in the Developer Sandbox](https://developers.redhat.com/articles/2023/03/30/try-camel-k-developer-sandbox-red-hat-openshift) muestra el mismo modelo: el operador vive fuera de tu proyecto y reacciona al Integration que creás. La configuración del registry está en [Camel K registry](https://camel.apache.org/camel-k/2.11.x/installation/registry.html) y en `oc explain integrationplatform.spec.build`.
+El workspace, un Integration y, en el paso 3, el broker entran juntos. Igual cada paso borra al anterior para no acumular Routes, pods ni el broker mientras avanzás. Antes de correr una tarea Local, conviene limpiar el lab del operador con **Paso 0** para no sumar dos JVMs de Camel a la cuota. La regla de cuota por proyecto está en [Resource quotas](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/working_with_quotas/quotas-setting-per-project-quotas). El artículo [Try Camel K in the Developer Sandbox](https://developers.redhat.com/articles/2023/03/30/try-camel-k-developer-sandbox-red-hat-openshift) muestra el mismo modelo: el operador vive fuera de tu proyecto y reacciona al Integration que creás. La configuración del registry está en [Camel K registry](https://camel.apache.org/camel-k/2.11.x/installation/registry.html) y en `oc explain integrationplatform.spec.build`.
 
 Para ver el consumo en cualquier momento: **Terminal → Run Task… → Estado del proyecto**, o `bash scripts/status.sh`.
 
@@ -207,7 +208,7 @@ Camel 4.22 trae [MCP Server](https://camel.apache.org/components/4.22.x/others/m
 - `ai-tool:order-status` (tag `orders`) toma `orderId` del header y llama a `direct:order-status`. Esa es la herramienta MCP.
 - `platform-http:/ask` llama la misma lógica (por defecto `A-100`, o `?orderId=B-200`) y le pide a Granite una frase.
 
-**Tarea.** Paso 5 — MCP. Imprime `initialize`, `tools/list`, `tools/call` de `A-100` y el `GET /ask?orderId=B-200`. En el workspace: **Local — MCP** usa runtime Quarkus para fijar `quarkus.camel.mcp-server.tags=orders` al construir, y prueba contra `127.0.0.1:8081`.
+**Tarea.** Paso 5 — MCP. Imprime `initialize`, `tools/list`, `tools/call` de `A-100` y el `GET /ask?orderId=B-200`. En el workspace: **Local — MCP** usa `--runtime=quarkus` para fijar `quarkus.camel.mcp-server.tags=orders` al construir. El proceso queda en primer plano; probá `curl http://127.0.0.1:8081/mcp` desde otra terminal.
 
 **Consola.** La Route sirve `/mcp` y `/ask` en el mismo host. Topology muestra un Deployment, `mcp`.
 
@@ -238,13 +239,13 @@ Camel 4.22 trae [MCP Server](https://camel.apache.org/components/4.22.x/others/m
 
 **La Route no abre.** `oc get route`. El host es el de tu proyecto. Sumá el path (`/hello`, `/ask` o `/mcp`).
 
-**Camel JBang no está.** Corré **Local — Instalar Camel JBang**. Si recreaste el workspace, el home efímero se borra y hay que instalar de nuevo.
+**Camel JBang no está.** El workspace lo instala al arrancar (`postStart`). Si no se completó, abrí una terminal y corré: `curl -Ls https://sh.jbang.dev | bash -s - app setup && export PATH="${HOME}/.jbang/bin:${PATH}" && jbang app install --force --fresh -Dcamel.jbang.version=4.22.0 -Dcamel-kamelets.version=4.22.0 camel@apache/camel`.
 
 **Puerto 8080 ocupado.** Las tareas Local HTTP, Granite y MCP usan el **8081**. No uses `--port 8080` en el workspace: ahí escucha el IDE.
 
 **OOM en el workspace.** El contenedor limita a 4Gi. Detené JBang con **Local — Detener** y bajá el lab del operador con el Paso 0 antes de volver a correr Local — MCP (el build Quarkus es el más pesado).
 
-**`tools/list` vacío en Local — MCP.** El tag `orders` no llegó al build Quarkus. Revisá el log de la tarea y que `scripts/local.sh` pase `quarkus.camel.mcp-server.tags=orders`.
+**`tools/list` vacío en Local — MCP.** El tag `orders` no llegó al build Quarkus. Revisá que el comando incluya `--property=quarkus.camel.mcp-server.tags=orders` (mirá el `devfile.yaml`).
 
 **Paso 0 no detiene JBang.** El Paso 0 solo borra recursos del cluster con la etiqueta del workshop. Para el proceso local usá **Local — Detener**.
 

@@ -21,7 +21,29 @@ components:
       cpuLimit: "2"
       mountSources: true
       sourceMapping: /projects
+events:
+  postStart:
+    - install-jbang
 commands:
+  # --- bootstrap: se ejecuta solo al crear el workspace ---
+  - id: install-jbang
+    exec:
+      component: tools
+      commandLine: >-
+        export PATH="${HOME}/.jbang/bin:${PATH}";
+        command -v jbang >/dev/null 2>&1 ||
+        { curl -Ls https://sh.jbang.dev | bash -s - app setup && export PATH="${HOME}/.jbang/bin:${PATH}"; };
+        camel version 2>/dev/null | grep -q 4.22.0 ||
+        jbang app install --force --fresh
+        -Dcamel.jbang.version=4.22.0 -Dcamel-kamelets.version=4.22.0
+        camel@apache/camel;
+        grep -q '.jbang/bin' "${HOME}/.bashrc" 2>/dev/null ||
+        echo 'export PATH="${HOME}/.jbang/bin:${PATH}"' >> "${HOME}/.bashrc";
+        camel version
+      workingDir: ${PROJECT_SOURCE}
+      label: Instalar JBang y Camel CLI 4.22.0
+
+  # --- operador Camel K (Pasos 0-5) ---
   - id: paso-0-limpiar
     exec:
       component: tools
@@ -76,69 +98,84 @@ commands:
       group:
         kind: run
         isDefault: false
-  - id: local-install
-    exec:
-      component: tools
-      commandLine: bash scripts/local.sh install
-      workingDir: ${PROJECT_SOURCE}
-      label: Local — Instalar Camel JBang
-      group:
-        kind: run
-        isDefault: false
+
+  # --- Camel JBang local (mismo *.camel.yaml, sin Integration) ---
   - id: local-hello
     exec:
       component: tools
-      commandLine: bash scripts/local.sh hello
+      commandLine: >-
+        camel run labs/01-hello/hello.camel.yaml
+        --java-version=17 --jvm-args=-Xmx1024m
       workingDir: ${PROJECT_SOURCE}
-      label: Local — Hello
+      label: "Local — Hello"
       group:
         kind: run
         isDefault: false
   - id: local-http
     exec:
       component: tools
-      commandLine: bash scripts/local.sh http
+      commandLine: >-
+        camel run labs/02-http/hello.camel.yaml
+        --java-version=17 --jvm-args=-Xmx1024m --port=8081
       workingDir: ${PROJECT_SOURCE}
-      label: Local — HTTP
+      label: "Local — HTTP (puerto 8081)"
       group:
         kind: run
         isDefault: false
   - id: local-kafka
     exec:
       component: tools
-      commandLine: bash scripts/local.sh kafka
+      commandLine: >-
+        oc apply -f labs/03-kafka/kafka.yaml &&
+        oc rollout status deployment/kafka --timeout=300s &&
+        camel run labs/03-kafka/orders.camel.yaml
+        --java-version=17 --jvm-args=-Xmx1024m
       workingDir: ${PROJECT_SOURCE}
-      label: Local — Kafka
+      label: "Local — Kafka"
       group:
         kind: run
         isDefault: false
   - id: local-granite
     exec:
       component: tools
-      commandLine: bash scripts/local.sh granite
+      commandLine: >-
+        export LLM_TOKEN=$(oc whoami -t) &&
+        camel run labs/04-granite/ask.camel.yaml platform/SandboxTrust.java
+        --java-version=17 --jvm-args=-Xmx1024m --port=8081
       workingDir: ${PROJECT_SOURCE}
-      label: Local — Granite
+      label: "Local — Granite (puerto 8081)"
       group:
         kind: run
         isDefault: false
   - id: local-mcp
     exec:
       component: tools
-      commandLine: bash scripts/local.sh mcp
+      commandLine: >-
+        export LLM_TOKEN=$(oc whoami -t) &&
+        camel run labs/05-mcp/mcp.camel.yaml platform/SandboxTrust.java
+        --runtime=quarkus
+        --dep=org.apache.camel.quarkus:camel-quarkus-ai-tool:3.39.0
+        --dep=org.apache.camel.quarkus:camel-quarkus-mcp-server:3.39.0
+        --property=quarkus.camel.mcp-server.tags=orders
+        --property=quarkus.mcp.server.server-info.name=camel-k-workshop
+        --property=quarkus.mcp.server.http.root-path=/mcp
+        --java-version=17 --jvm-args=-Xmx1024m --port=8081
       workingDir: ${PROJECT_SOURCE}
-      label: Local — MCP
+      label: "Local — MCP (Quarkus, puerto 8081)"
       group:
         kind: run
         isDefault: false
   - id: local-stop
     exec:
       component: tools
-      commandLine: bash scripts/local.sh stop
+      commandLine: camel stop 2>/dev/null || true; echo "Proceso local detenido."
       workingDir: ${PROJECT_SOURCE}
-      label: Local — Detener
+      label: "Local — Detener"
       group:
         kind: run
         isDefault: false
+
+  # --- utilidad ---
   - id: estado
     exec:
       component: tools
