@@ -1,0 +1,49 @@
+= Hello World — Inner Loop
+
+****
+*Duration:* 5 min +
+*Goal:* Run the hello timer route with Camel JBang inside Dev Spaces. No Integration yet.
+****
+
+image::module-hello.jpg[Hello World timer flow,width=100%]
+
+== Route
+
+File: `labs/01-hello/hello.camel.yaml`
+
+. `timer:tick` every 10 seconds
+. `setBody` to a greeting
+. `log` writes to stdout
+
+Open the file in Kaoto to see the canvas.
+
+== Run
+
+[source,bash]
+----
+source scripts/install-jbang.sh
+camel run labs/01-hello/hello.camel.yaml --java-version=17 --jvm-args=-Xmx1024m
+----
+
+Or *Terminal → Run Task… → Local — Hello*.
+
+== What to look for
+
+In the task terminal, lines like:
+
+----
+hello Hola desde Camel K en Developer Sandbox
+----
+
+Stop with Ctrl+C or *Local — Detener* (`camel stop`).
+
+== Docs
+
+* link:https://camel.apache.org/components/4.22.x/timer-component.html[timer]
+* link:https://camel.apache.org/components/4.22.x/log-component.html[log]
+* link:https://camel.apache.org/manual/yaml-dsl.html[YAML DSL]
+* link:https://camel.apache.org/manual/jbang-commands/camel-jbang-run.html[camel run]
+
+== Next
+
+Deploy the same YAML with the operator: xref:03-hello-outer.adoc[Hello World — Outer Loop].

@@ -1,0 +1,61 @@
+= Lab Setup & Dev Spaces
+
+****
+*Duration:* 10 min +
+*Goal:* Open the workshop workspace, confirm `oc` works, install Camel JBang, and know where Kaoto and Topology live.
+****
+
+== Open the workspace
+
+. Open the Developer Sandbox and start OpenShift Dev Spaces from the application launcher.
+. Create a workspace from this repository, or use the factory URL:
+
+[source,text]
+----
+{devspaces_url}
+----
+
+. Wait until the workspace is Ready. `oc whoami` and `oc project` already point at your `*-dev` project. Do not paste tokens into the repo.
+
+Dev Spaces loads link:{repo_url}/blob/master/devfile.yaml[`devfile.yaml`]. Tasks appear under *Terminal → Run Task…*. See link:https://docs.redhat.com/en/documentation/red_hat_openshift_dev_spaces/3.28/html/user_guide/assembly_getting-started_user_guide[Get started with OpenShift Dev Spaces].
+
+== Three views of every lab
+
+* *Task / terminal* -- Inner Loop: `camel run`. Outer Loop: `bash scripts/up.sh …`.
+* *OpenShift Console* -- Status bar → *Dev Spaces → Open OpenShift Console* → Developer → Topology.
+* *Kaoto* -- Open the lab's `*.camel.yaml`. Extension `redhat.vscode-kaoto` is recommended.
+
+Kaoto edits the YAML. Outer Loop runs `scripts/sync.py` to copy that flow into the Integration before `oc apply`.
+
+== Install Camel JBang (Inner Loop)
+
+The first Local task sources `scripts/install-jbang.sh`. From any terminal:
+
+[source,bash]
+----
+source scripts/install-jbang.sh
+camel version
+----
+
+You should see Camel CLI *4.22.0*. The install is idempotent. Ephemeral workspace storage means a new workspace needs the install again (or the first Local task does it for you).
+
+Docs: link:https://camel.apache.org/manual/camel-jbang-getting-started.html[Camel CLI Getting Started], link:https://camel.apache.org/manual/camel-jbang-installation.html[Installation Options].
+
+== Check the project
+
+[source,bash]
+----
+oc whoami
+oc project
+bash scripts/status.sh
+----
+
+Or *Terminal → Run Task… → Estado del proyecto*.
+
+== Quota tip
+
+Keep one lab running at a time. Outer Loop tasks call `scripts/down.sh` first. Before Inner Loop HTTP/AI labs, run *Paso 0 — Limpiar el lab activo* so you do not stack an Integration and a local JVM.
+
+== Next
+
+xref:02-hello-inner.adoc[Hello World — Inner Loop]

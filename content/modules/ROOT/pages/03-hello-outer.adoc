@@ -1,0 +1,47 @@
+= Hello World — Outer Loop
+
+****
+*Duration:* 10 min +
+*Goal:* Apply Integration `hello`. The Camel K operator builds a kit and runs a pod.
+****
+
+image::module-hello.jpg[Hello World timer flow,width=100%]
+
+== Same route, cluster deploy
+
+The Outer Loop uses the same `labs/01-hello/hello.camel.yaml`. `scripts/up.sh` runs `platform.sh`, clears the previous lab, syncs the flow into `integration.yaml`, and waits for Ready.
+
+[source,bash]
+----
+bash scripts/up.sh 01-hello
+----
+
+Or *Terminal → Run Task… → Paso 1 — Hello*.
+
+The first kit build can take several minutes (Maven downloads). Later builds are faster.
+
+== What to look for
+
+. Topology → Deployment `hello` → pod → *Logs*
+. Line: `hello Hola desde Camel K en Developer Sandbox`
+. Log also shows Apache Camel *4.22.0*
+
+[source,bash]
+----
+oc get integration hello
+oc logs -l camel.apache.org/integration=hello --tail=40
+----
+
+== Why a local IntegrationPlatform
+
+Without one, kits publish into `camel-k-operator` and your pod hits ImagePullBackOff. `scripts/platform.sh` creates platform `camel-k` with OpenShift profile, S2I publish, and routine build strategy. See link:https://camel.apache.org/camel-k/2.11.x/installation/registry.html[Camel K registry].
+
+== Docs
+
+* link:https://camel.apache.org/camel-k/next/running/running.html[Running an Integration]
+* link:https://camel.apache.org/camel-k/next/traits/container.html[container trait]
+* link:https://camel.apache.org/camel-k/next/apis/camel-k.html[Integration API]
+
+== Next
+
+xref:04-http-inner.adoc[HTTP Endpoint — Inner Loop]

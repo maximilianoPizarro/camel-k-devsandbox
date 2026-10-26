@@ -1,0 +1,40 @@
+= HTTP Endpoint — Outer Loop
+
+****
+*Duration:* 10 min +
+*Goal:* Deploy Integration `http-hello` with an OpenShift Route and TLS edge.
+****
+
+image::module-http.jpg[HTTP endpoint Inner and Outer paths,width=100%]
+
+== Deploy
+
+[source,bash]
+----
+bash scripts/up.sh 02-http
+----
+
+Or *Paso 2 — HTTP*. Replaces the previous lab.
+
+The IntegrationPlatform sets `profile: OpenShift`. The `route` trait creates the Route with `tlsTermination: edge` (required for HTTPS). The `ingress` trait is for Kubernetes profile only.
+
+== What to look for
+
+. Topology → `http-hello` → Route arrow
+. Task curl prints the body
+
+[source,bash]
+----
+HOST=$(oc get route/http-hello -o jsonpath='{.spec.host}')
+curl -kfsS "https://${HOST}/hello"
+----
+
+== Docs
+
+* link:https://camel.apache.org/camel-k/2.11.x/traits/route.html[route trait]
+* link:https://camel.apache.org/camel-k/2.11.x/traits/ingress.html[ingress trait]
+* link:https://camel.apache.org/components/4.22.x/platform-http-component.html[platform-http]
+
+== Next
+
+xref:06-kafka-inner.adoc[Kafka Messaging — Inner Loop]

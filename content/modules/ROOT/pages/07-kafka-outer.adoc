@@ -1,0 +1,41 @@
+= Kafka Messaging — Outer Loop
+
+****
+*Duration:* 10 min +
+*Goal:* Deploy Integration `orders` against the same KRaft broker. Topology shows two Deployments.
+****
+
+image::module-kafka.jpg[Kafka orders produce and consume,width=100%]
+
+== Deploy
+
+[source,bash]
+----
+bash scripts/up.sh 03-kafka
+----
+
+Or *Paso 3 — Kafka*. Applies the broker, waits for rollout, then the Integration.
+
+== What to look for
+
+. Topology: Deployments `kafka` and `orders`
+. Logs of `orders`:
+
+----
+publicado pedido A-100
+pedido recibido pedido A-100
+----
+
+[source,bash]
+----
+oc logs -l camel.apache.org/integration=orders --tail=40
+----
+
+== Docs
+
+* link:https://camel.apache.org/components/4.22.x/kafka-component.html[kafka component]
+* link:https://camel.apache.org/camel-k/next/traits/builder.html[builder trait]
+
+== Next
+
+xref:08-granite-inner.adoc[OpenShift AI + Granite — Inner Loop]

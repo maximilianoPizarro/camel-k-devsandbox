@@ -1,0 +1,54 @@
+= OpenShift AI + Granite — Inner Loop
+
+****
+*Duration:* 10 min +
+*Goal:* Call the shared Granite predictor from Camel JBang using `SandboxTrust.java` and your sandbox token.
+****
+
+image::module-granite.jpg[Granite ask flow,width=100%]
+
+== Model
+
+Internal URL (cluster DNS only):
+
+----
+https://isvc-granite-31-8b-fp8-predictor.sandbox-shared-models.svc.cluster.local:8443/v1/chat/completions
+----
+
+Your project GPU quota is 0; the model is shared. Docs: link:https://developers.redhat.com/learn/ai/get-started-consuming-gpu-hosted-large-language-models-developer-sandbox[GPU-hosted LLMs on Developer Sandbox].
+
+== Run
+
+`platform/SandboxTrust.java` trusts `/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt` (present in Dev Spaces and Integration pods).
+
+[source,bash]
+----
+source scripts/install-jbang.sh
+export LLM_TOKEN=$(oc whoami -t)
+camel stop 2>/dev/null || true
+camel run labs/04-granite/ask.camel.yaml platform/SandboxTrust.java \
+  --java-version=17 --jvm-args=-Xmx1024m --port=8081
+----
+
+Or *Local — Granite*. From another terminal:
+
+[source,bash]
+----
+curl -fsS --max-time 180 "http://127.0.0.1:8081/ask"
+----
+
+Default question: Content-Based Router EIP in two sentences. The model has no clock or internet — do not ask "what time is it".
+
+[source,bash]
+----
+curl -fsS --max-time 180 "http://127.0.0.1:8081/ask?q=Que+hace+el+componente+platform-http+de+Apache+Camel"
+----
+
+== Docs
+
+* link:https://camel.apache.org/components/4.22.x/http-component.html[http]
+* link:https://camel.apache.org/components/4.22.x/eips/choice-eip.html[choice EIP]
+
+== Next
+
+Deploy with the operator: xref:09-granite-outer.adoc[OpenShift AI + Granite — Outer Loop].

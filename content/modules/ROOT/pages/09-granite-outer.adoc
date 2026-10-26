@@ -1,0 +1,46 @@
+= OpenShift AI + Granite — Outer Loop
+
+****
+*Duration:* 10 min +
+*Goal:* Deploy Integration `granite` with Secret `sandbox-llm-token` and an OpenShift Route to `/ask`.
+****
+
+image::module-granite.jpg[Granite ask flow,width=100%]
+
+== Deploy
+
+[source,bash]
+----
+bash scripts/up.sh 04-granite
+----
+
+Or *Paso 4 — Granite*. Creates the Secret from `oc whoami -t` (not in git). Trait `environment` injects `LLM_TOKEN`.
+
+The route strips `CamelHttp*` and `Host`, then POSTs with `bridgeEndpoint=true` and `#sandboxSsl`. Without that, the model returns 404.
+
+== What to look for
+
+[source,bash]
+----
+HOST=$(oc get route/granite -o jsonpath='{.spec.host}')
+curl -kfsS --max-time 180 "https://${HOST}/ask"
+----
+
+Try more queries (URL-encode spaces as `+`):
+
+[source,bash]
+----
+curl -k "https://${HOST}/ask?q=Escribe+una+ruta+Apache+Camel+en+YAML+que+lea+de+Kafka+y+escriba+en+un+log"
+curl -k "https://${HOST}/ask?q=Que+ventaja+tiene+publicar+una+integracion+como+herramienta+MCP+en+lugar+de+API+REST"
+----
+
+If you get 401, the token expired — re-run the Paso 4 task.
+
+== Docs
+
+* link:https://camel.apache.org/camel-k/next/traits/environment.html[environment trait]
+* link:https://camel.apache.org/components/4.22.x/langchain4j-chat-component.html[langchain4j-chat] (alternative client)
+
+== Next
+
+xref:10-mcp-inner.adoc[MCP Server — Inner Loop]

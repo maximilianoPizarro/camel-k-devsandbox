@@ -1,0 +1,94 @@
+= MCP Server — Inner Loop
+
+****
+*Duration:* 15 min +
+*Goal:* Run the MCP server with Camel JBang Quarkus runtime so `quarkus.camel.mcp-server.tags=orders` is fixed at build time.
+****
+
+image::module-mcp.jpg[MCP tools and Granite,width=100%]
+
+== Route
+
+File: `labs/05-mcp/mcp.camel.yaml`
+
+* `direct:order-status` — fixed texts for A-100, B-200, C-300
+* `ai-tool:order-status` (tag `orders`) — MCP tool
+* `platform-http:/ask` — same logic + Granite one-liner
+
+== Run
+
+[source,bash]
+----
+source scripts/install-jbang.sh
+export LLM_TOKEN=$(oc whoami -t)
+camel stop 2>/dev/null || true
+camel run labs/05-mcp/mcp.camel.yaml platform/SandboxTrust.java \
+  --runtime=quarkus \
+  --dep=org.apache.camel.quarkus:camel-quarkus-ai-tool:3.39.0 \
+  --dep=org.apache.camel.quarkus:camel-quarkus-mcp-server:3.39.0 \
+  --property=quarkus.camel.mcp-server.tags=orders \
+  --property=quarkus.mcp.server.server-info.name=camel-k-workshop \
+  --property=quarkus.mcp.server.http.root-path=/mcp \
+  --java-version=17 --jvm-args=-Xmx1024m --port=8081
+----
+
+Or *Local — MCP*. The first Quarkus export/build can take several minutes.
+
+== Probe MCP (second terminal)
+
+[source,bash]
+----
+# 1. initialize
+curl -sS -D /tmp/mcp-hdr \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"workshop","version":"0.1.0"}}}' \
+  http://127.0.0.1:8081/mcp
+
+SID=$(awk 'tolower($1)=="mcp-session-id:" {print $2}' /tmp/mcp-hdr | tr -d '\r')
+
+# 2. tools/list
+curl -sS \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -H "Mcp-Session-Id: ${SID}" \
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
+  http://127.0.0.1:8081/mcp
+
+# 3. tools/call
+curl -sS \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -H "Mcp-Session-Id: ${SID}" \
+  -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"order-status","arguments":{"orderId":"A-100"}}}' \
+  http://127.0.0.1:8081/mcp
+
+# 4. ask Granite
+curl -sS --max-time 180 "http://127.0.0.1:8081/ask?orderId=B-200"
+----
+
+[cols="1,2"]
+|===
+|Call |Expected
+
+|`tools/list`
+|Tool `order-status` with `orderId`
+
+|`tools/call` A-100
+|`Pedido A-100 enviado desde Cordoba`
+
+|`/ask?orderId=B-200`
+|Spanish one-liner about Rosario / preparation
+|===
+
+If `tools/list` is empty, the tag did not reach the Quarkus build — check the task log for `No MCP tags configured`.
+
+== Docs
+
+* link:https://camel.apache.org/components/4.22.x/others/mcp-server.html[MCP Server]
+* link:https://camel.apache.org/camel-quarkus/3.40.x/reference/extensions/mcp-server.html[camel-quarkus-mcp-server]
+* link:https://modelcontextprotocol.io/specification/2024-11-05[MCP spec 2024-11-05]
+
+== Next
+
+xref:11-mcp-outer.adoc[MCP Server — Outer Loop]

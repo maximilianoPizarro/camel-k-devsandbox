@@ -1,0 +1,51 @@
+= Kafka Messaging — Inner Loop
+
+****
+*Duration:* 10 min +
+*Goal:* Start the KRaft broker Deployment, then produce and consume with `camel run` (no Integration `orders` yet).
+****
+
+image::module-kafka.jpg[Kafka orders produce and consume,width=100%]
+
+== Broker
+
+Single-node KRaft Deployment from `labs/03-kafka/kafka.yaml`. No Strimzi CRD. Service `kafka:9092` resolves from the Dev Spaces pod in the same project.
+
+[source,bash]
+----
+bash scripts/down.sh
+oc apply -f labs/03-kafka/kafka.yaml
+oc rollout status deployment/kafka --timeout=300s
+----
+
+Controller listens on `127.0.0.1:9093` (Kafka 3.9 rejects advertised `0.0.0.0` for the controller).
+
+== Run the routes
+
+File: `labs/03-kafka/orders.camel.yaml` — timer publishes `pedido A-100`, consumer logs it.
+
+[source,bash]
+----
+source scripts/install-jbang.sh
+camel run labs/03-kafka/orders.camel.yaml --java-version=17 --jvm-args=-Xmx1024m
+----
+
+Or *Local — Kafka*.
+
+== What to look for
+
+----
+publicado pedido A-100
+pedido recibido pedido A-100
+----
+
+(First consume may wait for the timer delay.)
+
+== Docs
+
+* link:https://camel.apache.org/components/4.22.x/kafka-component.html[kafka component]
+* link:https://kafka.apache.org/documentation/#kraft[KRaft]
+
+== Next
+
+Deploy Integration `orders` as well: xref:07-kafka-outer.adoc[Kafka Messaging — Outer Loop].

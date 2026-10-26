@@ -1,0 +1,42 @@
+= HTTP Endpoint — Inner Loop
+
+****
+*Duration:* 5 min +
+*Goal:* Serve `GET /hello` with Camel JBang on port 8081 (IDE already uses 8080).
+****
+
+image::module-http.jpg[HTTP endpoint Inner and Outer paths,width=100%]
+
+== Route
+
+File: `labs/02-http/hello.camel.yaml` — `platform-http:/hello` returns plain text.
+
+== Run
+
+Stop any previous local Camel process first.
+
+[source,bash]
+----
+source scripts/install-jbang.sh
+camel stop 2>/dev/null || true
+camel run labs/02-http/hello.camel.yaml --java-version=17 --jvm-args=-Xmx1024m --port=8081
+----
+
+Or *Local — HTTP (puerto 8081)*.
+
+From a *second* terminal:
+
+[source,bash]
+----
+curl -fsS http://127.0.0.1:8081/hello
+----
+
+Expected: `Hola desde platform-http`
+
+== Docs
+
+* link:https://camel.apache.org/components/4.22.x/platform-http-component.html[platform-http]
+
+== Next
+
+Expose the same route with an OpenShift Route: xref:05-http-outer.adoc[HTTP Endpoint — Outer Loop].

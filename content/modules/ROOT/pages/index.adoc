@@ -1,0 +1,136 @@
+= Red Hat Apache Camel Day Roadshow
+
+== Workshop Overview
+
+You will design Apache Camel routes visually with Kaoto, run them instantly inside OpenShift Dev Spaces with Camel JBang (**Inner Loop**), then deploy the same YAML with the Camel K operator (**Outer Loop**). Along the way you call a Kafka broker, an OpenShift AI model, and publish an MCP tool.
+
+This is a hands-on workshop on Apache Camel K, Camel JBang, Kaoto, and OpenShift AI on the Red Hat Developer Sandbox.
+
+****
+*Duration:* ~2 hours +
+*Format:* Hands-on workshop (self-service Dev Spaces) +
+*Repo:* {repo_url}
+****
+
+== Inner Loop and Outer Loop
+
+Every lab uses the same `*.camel.yaml` file. First you run it in the workspace; then you apply it as an Integration.
+
+image::inner-outer-loop.jpg[Inner Loop and Outer Loop,width=100%]
+
+[cols="1,2"]
+|===
+|Loop |What it means
+
+|*Inner Loop*
+|Edit the route in Kaoto, run `camel run` in the Dev Spaces terminal. No image build. Fast feedback on port `8081` (or logs for timer routes).
+
+|*Outer Loop*
+|`scripts/up.sh` syncs the YAML into an Integration CR. The Camel K operator builds a kit (S2I, routine), deploys a pod, and may expose an OpenShift Route.
+|===
+
+== Architecture
+
+image::camel-architecture.jpg[Camel Day Roadshow architecture,width=100%]
+
+[cols="1,2"]
+|===
+|Component |Description
+
+|OpenShift Dev Spaces
+|Cloud IDE with Kaoto and Camel JBang in the Universal Developer Image
+
+|Camel JBang 4.22
+|Inner Loop runtime: `camel run` on the same YAML
+
+|Camel K operator 2.11
+|Outer Loop: watches Integrations, builds kits, deploys pods
+
+|Apache Kafka (KRaft)
+|Single-broker Deployment for the orders lab (no Strimzi CRD needed)
+
+|OpenShift AI (Granite)
+|Shared GPU predictor `isvc-granite-31-8b-fp8` in `sandbox-shared-models`
+
+|MCP Server
+|`camel-quarkus-mcp-server` exposing `ai-tool` routes as tools
+|===
+
+== What You Will Learn
+
+* *Lab Setup* -- Open the repo in Dev Spaces, install JBang, use Kaoto and Topology.
+* *Hello World* -- Timer and log, Inner then Outer.
+* *HTTP* -- `platform-http`, local port 8081, then OpenShift Route with edge TLS.
+* *Kafka* -- Produce and consume on a minimal KRaft broker.
+* *Granite* -- Call OpenShift AI with TLS trust to the service CA.
+* *MCP* -- Publish `order-status` as a tool and ask Granite about an order.
+* *Wrap-up* -- Clean up and next steps.
+
+== Modules
+
+[cols="1,3,1,1"]
+|===
+|# |Module |Loop |Duration
+
+|01
+|xref:01-setup.adoc[Lab Setup & Dev Spaces]
+|--
+|10 min
+
+|02
+|xref:02-hello-inner.adoc[Hello World]
+|Inner
+|5 min
+
+|03
+|xref:03-hello-outer.adoc[Hello World]
+|Outer
+|10 min
+
+|04
+|xref:04-http-inner.adoc[HTTP Endpoint]
+|Inner
+|5 min
+
+|05
+|xref:05-http-outer.adoc[HTTP Endpoint]
+|Outer
+|10 min
+
+|06
+|xref:06-kafka-inner.adoc[Kafka Messaging]
+|Inner
+|10 min
+
+|07
+|xref:07-kafka-outer.adoc[Kafka Messaging]
+|Outer
+|10 min
+
+|08
+|xref:08-granite-inner.adoc[OpenShift AI + Granite]
+|Inner
+|10 min
+
+|09
+|xref:09-granite-outer.adoc[OpenShift AI + Granite]
+|Outer
+|10 min
+
+|10
+|xref:10-mcp-inner.adoc[MCP Server]
+|Inner
+|15 min
+
+|11
+|xref:11-mcp-outer.adoc[MCP Server]
+|Outer
+|15 min
+
+|12
+|xref:12-summary.adoc[Wrap-up]
+|--
+|5 min
+|===
+
+Select xref:01-setup.adoc[Lab Setup & Dev Spaces] to get started.

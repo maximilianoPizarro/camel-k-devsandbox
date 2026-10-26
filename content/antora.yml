@@ -1,0 +1,22 @@
+name: camel-day-roadshow
+title: Red Hat Apache Camel Day Roadshow
+version: main
+nav:
+  - modules/ROOT/nav.adoc
+
+asciidoc:
+  attributes:
+    lab_name: "Red Hat Apache Camel Day Roadshow"
+    release-version: main
+    page-pagination: true
+    repo_url: "https://github.com/maximilianoPizarro/camel-k-devsandbox"
+    devspaces_url: "https://workspaces.openshift.com/#https://github.com/maximilianoPizarro/camel-k-devsandbox/tree/master?storageType=ephemeral"
+    page-links:
+      - url: https://camel.apache.org/camel-k/next/running/running.html
+        text: Camel K Docs
+      - url: https://camel.apache.org/components/4.22.x/index.html
+        text: Camel 4.22 Components
+      - url: https://kaoto.io/docs/
+        text: Kaoto Docs
+      - url: https://docs.redhat.com/en/documentation/red_hat_openshift_dev_spaces/3.28
+        text: Dev Spaces Docs

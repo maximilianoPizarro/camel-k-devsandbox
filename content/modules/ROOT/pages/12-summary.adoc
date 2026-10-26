@@ -1,0 +1,54 @@
+= Wrap-up
+
+****
+*Duration:* 5 min +
+*Goal:* Recap Inner vs Outer Loop and leave the project clean.
+****
+
+== What you practiced
+
+[cols="1,2"]
+|===
+|Loop |Skills
+
+|*Inner Loop*
+|Kaoto canvas, `camel run`, port 8081, JBang Quarkus for MCP tags, curl against localhost
+
+|*Outer Loop*
+|Integration CR, IntegrationPlatform (routine + S2I), Routes with edge TLS, Secrets for LLM token, builder traits
+|===
+
+The shared artifact is always the lab `*.camel.yaml`.
+
+== Clean up
+
+Outer Loop resources (Integrations, Kafka Deployment, Secrets labeled for the workshop):
+
+[source,bash]
+----
+bash scripts/down.sh
+----
+
+Or *Paso 0 — Limpiar el lab activo*. Does **not** stop Camel JBang.
+
+Inner Loop process:
+
+[source,bash]
+----
+camel stop
+----
+
+Or *Local — Detener*.
+
+Leave the IntegrationPlatform `camel-k`, CamelCatalogs, and `modelmesh-serving` Service in place.
+
+== Keep exploring
+
+* link:https://camel.apache.org/camel-k/next/running/running.html[Camel K — Running an Integration]
+* link:https://camel.apache.org/components/4.22.x/index.html[Camel 4.22 components]
+* link:https://kaoto.io/docs/[Kaoto]
+* link:https://camel.apache.org/manual/camel-jbang.html[Camel JBang]
+* link:https://docs.redhat.com/en/documentation/red_hat_openshift_dev_spaces/3.28[OpenShift Dev Spaces]
+* Workshop source: {repo_url}
+
+Thank you for joining the Red Hat Apache Camel Day Roadshow.

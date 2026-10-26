@@ -1,0 +1,60 @@
+= MCP Server — Outer Loop
+
+****
+*Duration:* 15 min +
+*Goal:* Deploy Integration `mcp` with build-time tags via the builder trait and exercise `/mcp` and `/ask` on the Route.
+****
+
+image::module-mcp.jpg[MCP tools and Granite,width=100%]
+
+== Deploy
+
+Dependencies use `mvn:` coordinates so the sandbox CamelCatalog (3.15.3 names) does not reject them. Tag `orders` goes on `traits.builder.properties` because Quarkus fixes it at build time.
+
+[source,bash]
+----
+bash scripts/up.sh 05-mcp
+----
+
+Or *Paso 5 — MCP*. The task prints initialize, tools/list, tools/call, and `/ask`.
+
+== Manual curls against the Route
+
+[source,bash]
+----
+HOST=$(oc get route/mcp -o jsonpath='{.spec.host}')
+
+curl -ksS -D /tmp/mcp-hdr \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"workshop","version":"0.1.0"}}}' \
+  "https://${HOST}/mcp"
+
+SID=$(awk 'tolower($1)=="mcp-session-id:" {print $2}' /tmp/mcp-hdr | tr -d '\r')
+
+curl -ksS \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -H "Mcp-Session-Id: ${SID}" \
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
+  "https://${HOST}/mcp"
+
+curl -ksS \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -H "Mcp-Session-Id: ${SID}" \
+  -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"order-status","arguments":{"orderId":"A-100"}}}' \
+  "https://${HOST}/mcp"
+
+curl -ksS --max-time 180 "https://${HOST}/ask?orderId=B-200"
+----
+
+== Docs
+
+* link:https://camel.apache.org/components/4.22.x/ai-tool-component.html[ai-tool]
+* link:https://camel.apache.org/camel-k/next/traits/builder.html[builder trait]
+* link:https://camel.apache.org/blog/2026/08/camel-ai-tools-mcp-422/[Camel Routes as AI Tools]
+
+== Next
+
+xref:12-summary.adoc[Wrap-up]
