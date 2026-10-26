@@ -11,7 +11,7 @@
 If an Integration is still running, clean it first: *Outer — Clean*.
 ====
 
-image::module-granite.jpg[Granite ask flow,width=100%]
+image::module-granite.svg[Granite ask flow,width=100%]
 
 == Model
 

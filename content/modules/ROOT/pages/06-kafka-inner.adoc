@@ -11,7 +11,7 @@
 If an Integration is still running, clean it first: *Outer — Clean*.
 ====
 
-image::module-kafka.jpg[Kafka orders produce and consume,width=100%]
+image::module-kafka.svg[Kafka orders produce and consume,width=100%]
 
 == Broker
 

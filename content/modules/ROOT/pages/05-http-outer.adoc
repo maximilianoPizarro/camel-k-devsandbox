@@ -11,7 +11,7 @@
 Stop the Inner Loop first: *Inner — Stop* (`camel stop`).
 ====
 
-image::module-http.jpg[HTTP endpoint Inner and Outer paths,width=100%]
+image::module-http.svg[HTTP endpoint Inner and Outer paths,width=100%]
 
 [NOTE]
 ====

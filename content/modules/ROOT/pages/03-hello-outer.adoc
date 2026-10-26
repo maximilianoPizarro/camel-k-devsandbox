@@ -11,7 +11,7 @@
 Stop the Inner Loop first: *Inner — Stop* (`camel stop`).
 ====
 
-image::module-hello.jpg[Hello World timer flow,width=100%]
+image::module-hello.svg[Hello World timer flow,width=100%]
 
 [NOTE]
 ====

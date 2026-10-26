@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+    <rect width="800" height="450" fill="#1a1a1a"/>
+    <defs>
+        <style>
+            text { font-family: 'Red Hat Display', 'Open Sans', sans-serif; fill: #ffffff; }
+            .title { font-size: 24px; font-weight: bold; }
+            .subtitle { font-size: 16px; fill: #cccccc; }
+            .box { fill: #2b2b2b; stroke: #444444; stroke-width: 2; rx: 8; }
+            .box-red { fill: #2b2b2b; stroke: #EE0000; stroke-width: 2; rx: 8; }
+            .box-yellow { fill: #2b2b2b; stroke: #FFDD00; stroke-width: 2; rx: 8; }
+            .arrow { stroke: #FFDD00; stroke-width: 3; fill: none; }
+            .arrow-head { fill: #FFDD00; }
+            .arrow-green { stroke: #3E8635; stroke-width: 3; fill: none; }
+            .arrow-head-green { fill: #3E8635; }
+            .label { font-size: 14px; text-anchor: middle; }
+        </style>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="arrow-head" />
+        </marker>
+        <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="arrow-head-green" />
+        </marker>
+    </defs>
+    
+    <text x="400" y="50" class="title" text-anchor="middle">Module: Hello World</text>
+    <image x="650" y="30" width="100" height="50" href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDEzMC4yMSAxMzAuMDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iYSIgeDE9IjMzMy40OCIgeDI9IjQ3NyIgeTE9IjcwMi42IiB5Mj0iNTYzLjczIiBncmFkaWVudFRyYW5zZm9ybT0ibWF0cml4KC45OTIwNiAwIDAgLjk5MjA2IDk0LjAzOCAyNzYuMDYpIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHN0b3Agc3RvcC1jb2xvcj0iI0Y2OTkyMyIgb2Zmc2V0PSIwIi8+PHN0b3Agc3RvcC1jb2xvcj0iI0Y3OUEyMyIgb2Zmc2V0PSIuMTA5OTYiLz48c3RvcCBzdG9wLWNvbG9yPSIjRTk3ODI2IiBvZmZzZXQ9Ii45NDUwMiIvPjwvbGluZWFyR3JhZGllbnQ+PGxpbmVhckdyYWRpZW50IGlkPSJiIiB4MT0iMzMzLjQ4IiB4Mj0iNDc3IiB5MT0iNzAyLjYiIHkyPSI1NjMuNzMiIGdyYWRpZW50VHJhbnNmb3JtPSJtYXRyaXgoLjk5MjA2IDAgMCAuOTkyMDYgOTQuMDM4IDI3Ni4wNikiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj48c3RvcCBzdG9wLWNvbG9yPSIjRjY5OTIzIiBvZmZzZXQ9IjAiLz48c3RvcCBzdG9wLWNvbG9yPSIjRjc5QTIzIiBvZmZzZXQ9Ii4wODA0NzgiLz48c3RvcCBzdG9wLWNvbG9yPSIjRTk3ODI2IiBvZmZzZXQ9Ii40MTg3NCIvPjwvbGluZWFyR3JhZGllbnQ+PGxpbmVhckdyYWRpZW50IGlkPSJjIiB4MT0iNjMzLjU1IiB4Mj0iNTY2LjQ3IiB5MT0iODE0LjYiIHkyPSI5MDkuMTIiIGdyYWRpZW50VHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTg1LjQyMSA1Ni4yMzYpIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHN0b3Agc3RvcC1jb2xvcj0iI2Y2ZTQyMyIgb2Zmc2V0PSIwIi8+PHN0b3Agc3RvcC1jb2xvcj0iI0Y3OUEyMyIgb2Zmc2V0PSIuNDExOTEiLz48c3RvcCBzdG9wLWNvbG9yPSIjRTk3ODI2IiBvZmZzZXQ9Ii43MzI3MSIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKC00MzcuODkgLTgzNS4yOSkiPjxjaXJjbGUgY3g9IjUwMy4xIiBjeT0iOTAwLjI5IiByPSI2Mi41MiIgZmlsbD0idXJsKCNhKSIgc3Ryb2tlPSJ1cmwoI2IpIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2Utd2lkdGg9IjQuOTYwMyIvPjxwYXRoIGQ9Im00ODcuODkgODczLjY0Yy0wLjg4OTA2LTFlLTMgLTEuNzg5NyA1ZS0zIC0yLjY4NzUgMC4wMzEyLTEuMDQzNyAwLjAzMDgtMi40NDU5IDAuMzYyMTgtNC4wNjI1IDAuOTA2MjUgMjcuMzA5IDIwLjczNyAzNy4xMjcgNTguMTQ2IDIwLjI1IDkwLjY1NiAwLjU3MzE3IDAuMDE0OSAxLjE0MiAwLjA2MjUgMS43MTg4IDAuMDYyNSAzMC44NDQgMCA1Ni42Mi0yMS40OTMgNjMuMjgxLTUwLjMxMi0xOS41NzMtMjIuOTQzLTQ2LjExOC00MS4yOTQtNzguNS00MS4zNDR6IiBmaWxsPSJ1cmwoI2MpIiBvcGFjaXR5PSIuNzUiLz48cGF0aCBkPSJtNDgxLjE0IDg3NC41OGMtOS4wNjgyIDMuMDUxOC0yNi4zNjggMTMuODAyLTQzIDI4LjE1NiAxLjI2MzEgMzQuMTk1IDI4Ljk2MSA2MS42MDcgNjMuMjUgNjIuNSAxNi44NzctMzIuNTEgNy4wNTk0LTY5LjkxOS0yMC4yNS05MC42NTZ6IiBmaWxsPSIjMjgxNzBiIiBvcGFjaXR5PSIuNzUiLz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtODUuNDIxIDU2LjIzNikiPjxwYXRoIGQ9Im01OTAuMzEgODA2LjMxYy0wLjQ3MjM5LTAuMDMyMS0wLjkzMTUxIDAuMDI4NC0xLjM3NSAwLjI1LTUuNTk5MiAyLjgwMTEgMCAxNCAwIDE0LTE2LjgwNyAxNC4wMDktMTMuMjM2IDM3LjkzOC0zMi44NDQgMzcuOTM4LTEwLjY4OSAwLTIxLjMyMi0xMi4yOTMtMzIuNTMxLTE5LjgxMi0wLjE0NDMgMS43NzMzLTAuMjUgMy41NjQ1LTAuMjUgNS4zNzUgMCAyNC41MTUgMTMuNTEgNDUuODYzIDMzLjQ2OSA1Ny4wNjMgNS41ODI4LTAuNzAzMjEgMTEuMTU4LTIuMTEzOSAxNS4zNDQtNC45MDYyIDIxLjk5Mi0xNC42NjIgMjcuNDUyLTQyLjU1NyAzNi40MzgtNTYuMDMxIDUuNTk2Mi04LjQwNjMgMzEuODI0LTcuNjc2OSAzMy41OTQtMTEuMjE5IDIuODA0MS01LjYwMjItNS42MDIxLTE0LTguNDA2Mi0xNGgtMjIuNDA2Yy0xLjU2NTUgMC00LjAyNTMtMi43ODEyLTUuNTkzOC0yLjc4MTJoLTguNDA2MnMtMy43MjQ1LTUuNjUwMy03LjAzMTItNS44NzV6IiBmaWxsPSIjZmZmIi8+PC9nPjwvZz48L3N2Zz4="/>
+    
+    
+    <rect x="100" y="150" width="150" height="100" class="box"/>
+    <text x="175.0" y="180" class="label" font-weight="bold">timer:tick</text>
+    
+    <text x="175" y="210" class="label" fill="#cccccc">period=10s</text>
+    
+    <line x1="250" y1="200" x2="340" y2="200" class="arrow" marker-end="url(#arrowhead)"/>
+    
+    
+    <rect x="350" y="150" width="150" height="100" class="box"/>
+    <text x="425.0" y="180" class="label" font-weight="bold">setBody</text>
+    
+    <text x="425" y="210" class="label" fill="#cccccc">"Hola desde Camel K"</text>
+    
+    <line x1="500" y1="200" x2="590" y2="200" class="arrow" marker-end="url(#arrowhead)"/>
+    
+    
+    <rect x="600" y="150" width="150" height="100" class="box"/>
+    <text x="675.0" y="180" class="label" font-weight="bold">log</text>
+    
+    <text x="675" y="210" class="label" fill="#cccccc">Writes to stdout</text>
+
+</svg>

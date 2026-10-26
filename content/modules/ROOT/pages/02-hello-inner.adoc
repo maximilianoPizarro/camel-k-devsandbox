@@ -6,7 +6,7 @@
 *Dev Spaces task:* *Inner — Hello*
 ****
 
-image::module-hello.jpg[Hello World timer flow,width=100%]
+image::module-hello.svg[Hello World timer flow,width=100%]
 
 == Route
 

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+    <rect width="800" height="450" fill="#1a1a1a"/>
+    <defs>
+        <style>
+            text { font-family: 'Red Hat Display', 'Open Sans', sans-serif; fill: #ffffff; }
+            .title { font-size: 24px; font-weight: bold; }
+            .subtitle { font-size: 16px; fill: #cccccc; }
+            .box { fill: #2b2b2b; stroke: #444444; stroke-width: 2; rx: 8; }
+            .box-red { fill: #2b2b2b; stroke: #EE0000; stroke-width: 2; rx: 8; }
+            .box-yellow { fill: #2b2b2b; stroke: #FFDD00; stroke-width: 2; rx: 8; }
+            .arrow { stroke: #FFDD00; stroke-width: 3; fill: none; }
+            .arrow-head { fill: #FFDD00; }
+            .arrow-green { stroke: #3E8635; stroke-width: 3; fill: none; }
+            .arrow-head-green { fill: #3E8635; }
+            .label { font-size: 14px; text-anchor: middle; }
+        </style>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="arrow-head" />
+        </marker>
+        <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="arrow-head-green" />
+        </marker>
+    </defs>
+    
+    <text x="400" y="50" class="title" text-anchor="middle">Module: Kafka Messaging</text>
+    
+    
+    <rect x="50" y="200" width="150" height="80" class="box"/>
+    <text x="125.0" y="230" class="label" font-weight="bold">Producer</text>
+    
+    <text x="125" y="255" class="label" fill="#cccccc">timer:orders</text>
+    
+    <line x1="200" y1="240" x2="290" y2="240" class="arrow" marker-end="url(#arrowhead)"/>
+    
+    
+    <rect x="300" y="150" width="200" height="180" class="box-red"/>
+    <text x="400.0" y="180" class="label" font-weight="bold">Apache Kafka</text>
+    
+    <text x="400" y="210" class="label" fill="#FFDD00">Topic: orders</text>
+    <text x="400" y="250" class="label">KRaft Broker</text>
+    <text x="400" y="280" class="label" fill="#cccccc">Single Node</text>
+    
+    <line x1="500" y1="240" x2="590" y2="240" class="arrow" marker-end="url(#arrowhead)"/>
+    
+    
+    <rect x="600" y="200" width="150" height="80" class="box"/>
+    <text x="675.0" y="230" class="label" font-weight="bold">Consumer</text>
+    
+    <text x="675" y="255" class="label" fill="#cccccc">log: received</text>
+
+</svg>

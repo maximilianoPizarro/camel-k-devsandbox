@@ -22,7 +22,7 @@ It does *not* cover CI/CD pipelines or GitOps promotion (OpenShift Pipelines, Op
 
 Every lab uses the same `*.camel.yaml` file. First you run it in the workspace; then you apply it as an Integration.
 
-image::inner-outer-loop.jpg[Inner Loop and Outer Loop,width=100%]
+image::inner-outer-loop.svg[Inner Loop and Outer Loop,width=100%]
 
 [cols="1,1,1,1,1,1,1"]
 |===
@@ -52,7 +52,7 @@ image::inner-outer-loop.jpg[Inner Loop and Outer Loop,width=100%]
 
 == Architecture
 
-image::camel-architecture.jpg[Camel Day Roadshow architecture,width=100%]
+image::camel-architecture.svg[Camel Day Roadshow architecture,width=100%]
 
 [cols="1,2"]
 |===
