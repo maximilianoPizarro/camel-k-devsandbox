@@ -218,6 +218,52 @@ Camel 4.22 trae [MCP Server](https://camel.apache.org/components/4.22.x/others/m
 
 **Tarea.** Paso 5 — MCP. Imprime `initialize`, `tools/list`, `tools/call` de `A-100` y el `GET /ask?orderId=B-200`. En el workspace: **Local — MCP** usa `--runtime=quarkus` para fijar `quarkus.camel.mcp-server.tags=orders` al construir. El proceso queda en primer plano; probá `curl http://127.0.0.1:8081/mcp` desde otra terminal.
 
+**Probar MCP manualmente.** La tarea del Paso 5 hace estos curls automáticamente. Para probar desde otra terminal (cambiá `HOST` por la Route del cluster o `127.0.0.1:8081` en Local):
+
+```bash
+# Variable con el host (operador)
+HOST=$(oc get route/mcp -o jsonpath='{.spec.host}')
+# O para Local — MCP:  HOST=127.0.0.1:8081
+
+# 1. initialize — devuelve capabilities y el Mcp-Session-Id
+curl -ksS -D /tmp/mcp-hdr \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"workshop","version":"0.1.0"}}}' \
+  "https://${HOST}/mcp"
+
+# 2. Capturar session id
+SID=$(awk 'tolower($1)=="mcp-session-id:" {print $2}' /tmp/mcp-hdr | tr -d '\r')
+
+# 3. tools/list — tiene que incluir order-status
+curl -ksS \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -H "Mcp-Session-Id: ${SID}" \
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
+  "https://${HOST}/mcp"
+
+# 4. tools/call — llama la herramienta
+curl -ksS \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -H "Mcp-Session-Id: ${SID}" \
+  -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"order-status","arguments":{"orderId":"A-100"}}}' \
+  "https://${HOST}/mcp"
+
+# 5. /ask — Granite redacta el estado del pedido
+curl -ksS --max-time 180 "https://${HOST}/ask?orderId=B-200"
+```
+
+| Paso | Respuesta esperada |
+| --- | --- |
+| `initialize` | `serverInfo.name` = `camel-k-workshop`, `capabilities.tools` presente |
+| `tools/list` | Herramienta `order-status` con parámetro `orderId` |
+| `tools/call` A-100 | `Pedido A-100 enviado desde Cordoba` |
+| `/ask?orderId=B-200` | Granite redacta algo como *"El pedido B-200 está en preparación en Rosario"* |
+
+Si `tools/list` viene vacío, el tag `orders` no llegó al build. Buscá en el log `No MCP tags configured`.
+
 **Consola.** La Route sirve `/mcp` y `/ask` en el mismo host. Topology muestra un Deployment, `mcp`.
 
 **Kaoto.** `labs/05-mcp/mcp.camel.yaml`. El canvas muestra las tres rutas. El servidor MCP no es una ruta: sale de las dependencias Maven y de `quarkus.camel.mcp-server.tags` en el trait `builder`.
