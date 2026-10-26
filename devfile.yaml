@@ -22,13 +22,13 @@ components:
       mountSources: true
       sourceMapping: /projects
 commands:
-  # --- operador Camel K (Pasos 0-5) ---
+  # --- Outer Loop: operador Camel K ---
   - id: paso-0-limpiar
     exec:
       component: tools
       commandLine: bash scripts/down.sh
       workingDir: ${PROJECT_SOURCE}
-      label: Paso 0 — Limpiar el lab activo
+      label: Outer — Clean
       group:
         kind: run
         isDefault: false
@@ -37,7 +37,7 @@ commands:
       component: tools
       commandLine: bash scripts/up.sh 01-hello
       workingDir: ${PROJECT_SOURCE}
-      label: Paso 1 — Hello
+      label: Outer — Hello
       group:
         kind: run
         isDefault: false
@@ -46,7 +46,7 @@ commands:
       component: tools
       commandLine: bash scripts/up.sh 02-http
       workingDir: ${PROJECT_SOURCE}
-      label: Paso 2 — HTTP
+      label: Outer — HTTP
       group:
         kind: run
         isDefault: false
@@ -55,7 +55,7 @@ commands:
       component: tools
       commandLine: bash scripts/up.sh 03-kafka
       workingDir: ${PROJECT_SOURCE}
-      label: Paso 3 — Kafka
+      label: Outer — Kafka
       group:
         kind: run
         isDefault: false
@@ -64,7 +64,7 @@ commands:
       component: tools
       commandLine: bash scripts/up.sh 04-granite
       workingDir: ${PROJECT_SOURCE}
-      label: Paso 4 — Granite
+      label: Outer — Granite
       group:
         kind: run
         isDefault: false
@@ -73,12 +73,12 @@ commands:
       component: tools
       commandLine: bash scripts/up.sh 05-mcp
       workingDir: ${PROJECT_SOURCE}
-      label: Paso 5 — MCP
+      label: Outer — MCP
       group:
         kind: run
         isDefault: false
 
-  # --- Camel JBang local (mismo *.camel.yaml, sin Integration) ---
+  # --- Inner Loop: Camel JBang (mismo *.camel.yaml, sin Integration) ---
   # El source scripts/install-jbang.sh instala JBang + Camel CLI 4.22.0
   # la primera vez; despues es instantaneo. El comando camel run que sigue
   # es el que copies a cualquier terminal.
@@ -90,7 +90,7 @@ commands:
         camel run labs/01-hello/hello.camel.yaml
         --java-version=17 --jvm-args=-Xmx1024m
       workingDir: ${PROJECT_SOURCE}
-      label: "Local — Hello"
+      label: "Inner — Hello"
       group:
         kind: run
         isDefault: false
@@ -102,7 +102,7 @@ commands:
         camel run labs/02-http/hello.camel.yaml
         --java-version=17 --jvm-args=-Xmx1024m --port=8081
       workingDir: ${PROJECT_SOURCE}
-      label: "Local — HTTP (puerto 8081)"
+      label: "Inner — HTTP"
       group:
         kind: run
         isDefault: false
@@ -116,7 +116,7 @@ commands:
         camel run labs/03-kafka/orders.camel.yaml
         --java-version=17 --jvm-args=-Xmx1024m
       workingDir: ${PROJECT_SOURCE}
-      label: "Local — Kafka"
+      label: "Inner — Kafka"
       group:
         kind: run
         isDefault: false
@@ -129,7 +129,7 @@ commands:
         camel run labs/04-granite/ask.camel.yaml platform/SandboxTrust.java
         --java-version=17 --jvm-args=-Xmx1024m --port=8081
       workingDir: ${PROJECT_SOURCE}
-      label: "Local — Granite (puerto 8081)"
+      label: "Inner — Granite"
       group:
         kind: run
         isDefault: false
@@ -148,7 +148,7 @@ commands:
         --property=quarkus.mcp.server.http.root-path=/mcp
         --java-version=17 --jvm-args=-Xmx1024m --port=8081
       workingDir: ${PROJECT_SOURCE}
-      label: "Local — MCP (Quarkus, puerto 8081)"
+      label: "Inner — MCP"
       group:
         kind: run
         isDefault: false
@@ -160,7 +160,7 @@ commands:
         camel stop 2>/dev/null || true;
         echo "Proceso local detenido."
       workingDir: ${PROJECT_SOURCE}
-      label: "Local — Detener"
+      label: "Inner — Stop"
       group:
         kind: run
         isDefault: false

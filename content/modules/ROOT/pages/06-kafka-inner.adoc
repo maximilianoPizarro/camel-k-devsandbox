@@ -2,8 +2,14 @@
 
 ****
 *Duration:* 10 min +
-*Goal:* Start the KRaft broker Deployment, then produce and consume with `camel run` (no Integration `orders` yet).
+*Goal:* Start the KRaft broker Deployment, then produce and consume with `camel run` (no Integration `orders` yet). +
+*Dev Spaces task:* *Inner — Kafka*
 ****
+
+[IMPORTANT]
+====
+If an Integration is still running, clean it first: *Outer — Clean*.
+====
 
 image::module-kafka.jpg[Kafka orders produce and consume,width=100%]
 
@@ -30,7 +36,7 @@ source scripts/install-jbang.sh
 camel run labs/03-kafka/orders.camel.yaml --java-version=17 --jvm-args=-Xmx1024m
 ----
 
-Or *Local — Kafka*.
+Or *Inner — Kafka*.
 
 == What to look for
 

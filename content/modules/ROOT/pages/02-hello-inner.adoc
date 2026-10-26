@@ -2,7 +2,8 @@
 
 ****
 *Duration:* 5 min +
-*Goal:* Run the hello timer route with Camel JBang inside Dev Spaces. No Integration yet.
+*Goal:* Run the hello timer route with Camel JBang inside Dev Spaces. No Integration yet. +
+*Dev Spaces task:* *Inner — Hello*
 ****
 
 image::module-hello.jpg[Hello World timer flow,width=100%]
@@ -25,7 +26,7 @@ source scripts/install-jbang.sh
 camel run labs/01-hello/hello.camel.yaml --java-version=17 --jvm-args=-Xmx1024m
 ----
 
-Or *Terminal → Run Task… → Local — Hello*.
+Or *Terminal → Run Task… → Inner — Hello*.
 
 == What to look for
 
@@ -35,7 +36,7 @@ In the task terminal, lines like:
 hello Hola desde Camel K en Developer Sandbox
 ----
 
-Stop with Ctrl+C or *Local — Detener* (`camel stop`).
+Stop with Ctrl+C or *Inner — Stop* (`camel stop`).
 
 == Docs
 

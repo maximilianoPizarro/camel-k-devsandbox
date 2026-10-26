@@ -2,10 +2,24 @@
 
 ****
 *Duration:* 10 min +
-*Goal:* Deploy Integration `http-hello` with an OpenShift Route and TLS edge.
+*Goal:* Deploy Integration `http-hello` with an OpenShift Route and TLS edge. +
+*Dev Spaces task:* *Outer — HTTP*
 ****
 
+[IMPORTANT]
+====
+Stop the Inner Loop first: *Inner — Stop* (`camel stop`).
+====
+
 image::module-http.jpg[HTTP endpoint Inner and Outer paths,width=100%]
+
+[NOTE]
+====
+*What changes from the Inner Loop*
+
+* *Inner:* HTTP on port *8081*, `curl http://127.0.0.1:8081/hello`.
+* *Outer:* container port *8080*, OpenShift Route with *TLS edge*, `curl -k https://<route>/hello`.
+====
 
 == Deploy
 
@@ -14,7 +28,7 @@ image::module-http.jpg[HTTP endpoint Inner and Outer paths,width=100%]
 bash scripts/up.sh 02-http
 ----
 
-Or *Paso 2 — HTTP*. Replaces the previous lab.
+Or *Outer — HTTP*. Replaces the previous Outer lab.
 
 The IntegrationPlatform sets `profile: OpenShift`. The `route` trait creates the Route with `tlsTermination: edge` (required for HTTPS). The `ingress` trait is for Kubernetes profile only.
 

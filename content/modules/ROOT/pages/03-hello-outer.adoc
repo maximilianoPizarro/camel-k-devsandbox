@@ -2,10 +2,24 @@
 
 ****
 *Duration:* 10 min +
-*Goal:* Apply Integration `hello`. The Camel K operator builds a kit and runs a pod.
+*Goal:* Apply Integration `hello`. The Camel K operator builds a kit and runs a pod. +
+*Dev Spaces task:* *Outer — Hello*
 ****
 
+[IMPORTANT]
+====
+Stop the Inner Loop first: *Inner — Stop* (`camel stop`).
+====
+
 image::module-hello.jpg[Hello World timer flow,width=100%]
+
+[NOTE]
+====
+*What changes from the Inner Loop*
+
+* *Inner:* logs appear in the `camel run` terminal.
+* *Outer:* the operator creates pod `hello`; you read the same greeting in Topology → Logs.
+====
 
 == Same route, cluster deploy
 
@@ -16,7 +30,7 @@ The Outer Loop uses the same `labs/01-hello/hello.camel.yaml`. `scripts/up.sh` r
 bash scripts/up.sh 01-hello
 ----
 
-Or *Terminal → Run Task… → Paso 1 — Hello*.
+Or *Terminal → Run Task… → Outer — Hello*.
 
 The first kit build can take several minutes (Maven downloads). Later builds are faster.
 

@@ -11,31 +11,31 @@
 
 Workshop para recorrer Apache Camel K dentro de un workspace de [OpenShift Dev Spaces](https://docs.redhat.com/en/documentation/red_hat_openshift_dev_spaces/3.28/html/user_guide/assembly_getting-started_user_guide) en el mismo [Developer Sandbox](https://developers.redhat.com/developer-sandbox). Cada paso es una tarea del `devfile.yaml`. El paso siguiente borra el anterior, así en el proyecto queda un solo ejemplo vivo.
 
-El operador Camel K ya está instalado en el sandbox y observa tu proyecto. Estos labs no instalan otro operador. En el sandbox de referencia el kit arranca con Camel 4.22.0 y Camel Quarkus 3.39.0 (Quarkus 3.39.1). Puede haber un CamelCatalog 3.15.3 en el proyecto; el build usa el runtime del IntegrationPlatform, no ese catálogo. El Paso 1 imprime la versión en el log del pod.
+El operador Camel K ya está instalado en el sandbox y observa tu proyecto. Estos labs no instalan otro operador. En el sandbox de referencia el kit arranca con Camel 4.22.0 y Camel Quarkus 3.39.0 (Quarkus 3.39.1). Puede haber un CamelCatalog 3.15.3 en el proyecto; el build usa el runtime del IntegrationPlatform, no ese catálogo. Outer — Hello imprime la versión en el log del pod.
 
 ## Qué vas a dejar corriendo
 
-| Paso | Tarea en Dev Spaces | Qué crea | Qué mirar |
+| Lab | Tarea en Dev Spaces | Qué crea | Qué mirar |
 | --- | --- | --- | --- |
-| 0 | Paso 0 — Limpiar el lab activo | Borra lo etiquetado por el workshop | Topology vacío de estos labs |
-| 1 | Paso 1 — Hello | Integration `hello` | Log `hello Hola desde Camel K...` |
-| 2 | Paso 2 — HTTP | Integration `http-hello` y su Route | `GET /hello` |
-| 3 | Paso 3 — Kafka | Deployment `kafka` e Integration `orders` | Log `pedido recibido pedido A-100` |
-| 4 | Paso 4 — Granite | Integration `granite`, Secret del token y Route | Texto del modelo en `GET /ask` |
-| 5 | Paso 5 — MCP | Integration `mcp`, Secret del token y Route | `tools/list`, `tools/call` y `GET /ask` |
+| 0 | Outer — Clean | Borra lo etiquetado por el workshop | Topology vacío de estos labs |
+| 1 | Outer — Hello | Integration `hello` | Log `hello Hola desde Camel K...` |
+| 2 | Outer — HTTP | Integration `http-hello` y su Route | `GET /hello` |
+| 3 | Outer — Kafka | Deployment `kafka` e Integration `orders` | Log `pedido recibido pedido A-100` |
+| 4 | Outer — Granite | Integration `granite`, Secret del token y Route | Texto del modelo en `GET /ask` |
+| 5 | Outer — MCP | Integration `mcp`, Secret del token y Route | `tools/list`, `tools/call` y `GET /ask` |
 
 ### Misma ruta, en el workspace (Camel JBang)
 
-La primera tarea Local que ejecutes instala JBang y el Camel CLI 4.22.0 automáticamente (las siguientes veces es instantáneo). El comando `camel run` aparece directo en el devfile para que lo copies a cualquier terminal. Desde una terminal manual: `source scripts/install-jbang.sh` y después el `camel run` que quieras.
+La primera tarea Inner que ejecutes instala JBang y el Camel CLI 4.22.0 automáticamente (las siguientes veces es instantáneo). El comando `camel run` aparece directo en el devfile para que lo copies a cualquier terminal. Desde una terminal manual: `source scripts/install-jbang.sh` y después el `camel run` que quieras.
 
 | Tarea | Comando | Qué mirar |
 | --- | --- | --- |
-| Local — Hello | `camel run labs/01-hello/hello.camel.yaml` | Log en la terminal |
-| Local — HTTP | `camel run labs/02-http/hello.camel.yaml --port=8081` | `curl http://127.0.0.1:8081/hello` desde otra terminal |
-| Local — Kafka | `oc apply` del broker + `camel run labs/03-kafka/orders.camel.yaml` | Log `pedido recibido pedido A-100` |
-| Local — Granite | `export LLM_TOKEN=$(oc whoami -t)` + `camel run labs/04-granite/ask.camel.yaml platform/SandboxTrust.java --port=8081` | `curl http://127.0.0.1:8081/ask` desde otra terminal |
-| Local — MCP | `camel run labs/05-mcp/mcp.camel.yaml platform/SandboxTrust.java --runtime=quarkus --port=8081` + deps | `curl http://127.0.0.1:8081/mcp` y `/ask` desde otra terminal |
-| Local — Detener | `camel stop` | `camel ps` vacío |
+| Inner — Hello | `camel run labs/01-hello/hello.camel.yaml` | Log en la terminal |
+| Inner — HTTP | `camel run labs/02-http/hello.camel.yaml --port=8081` | `curl http://127.0.0.1:8081/hello` desde otra terminal |
+| Inner — Kafka | `oc apply` del broker + `camel run labs/03-kafka/orders.camel.yaml` | Log `pedido recibido pedido A-100` |
+| Inner — Granite | `export LLM_TOKEN=$(oc whoami -t)` + `camel run labs/04-granite/ask.camel.yaml platform/SandboxTrust.java --port=8081` | `curl http://127.0.0.1:8081/ask` desde otra terminal |
+| Inner — MCP | `camel run labs/05-mcp/mcp.camel.yaml platform/SandboxTrust.java --runtime=quarkus --port=8081` + deps | `curl http://127.0.0.1:8081/mcp` y `/ask` desde otra terminal |
+| Inner — Stop | `camel stop` | `camel ps` vacío |
 
 El workspace de Dev Spaces también es un pod de tu proyecto y cuenta en la misma cuota. El devfile pide 512Mi / 200m de request y limita el contenedor a 4Gi / 2 CPU (el IDE más Camel JBang).
 
@@ -52,7 +52,7 @@ Ningún paso corre solo al abrir el workspace. Elegís la tarea cuando querés a
 
 ## Tres vistas del mismo lab
 
-**La tarea.** Los Pasos 1 a 5 corren `scripts/up.sh`. Ese script borra el lab anterior, sincroniza el YAML de Kaoto con el Integration y hace `oc apply`. La salida te dice el nombre del Deployment y, si hay HTTP, la URL de la Route. Las tareas **Local — …** corren el mismo `*.camel.yaml` con `camel run` dentro del workspace. El comando aparece directo en el [`devfile.yaml`](devfile.yaml) para que lo copies a cualquier terminal.
+**La tarea.** Las tareas **Outer — …** corren `scripts/up.sh`. Ese script borra el lab anterior, sincroniza el YAML de Kaoto con el Integration y hace `oc apply`. La salida te dice el nombre del Deployment y, si hay HTTP, la URL de la Route. Las tareas **Inner — …** corren el mismo `*.camel.yaml` con `camel run` dentro del workspace. El comando aparece directo en el [`devfile.yaml`](devfile.yaml) para que lo copies a cualquier terminal.
 
 **La consola de OpenShift.** En la barra de estado del IDE, **Dev Spaces → Open OpenShift Console**. Cambiá a la perspectiva **Developer**, elegí tu proyecto y abrí **Topology**. Ahí ves el Deployment de la Integration, el pod y la flecha de la Route. Los logs están en el pod. La vista está documentada en [Viewing application composition using the Topology view](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/building_applications/odc-viewing-application-composition-using-topology-view).
 
@@ -64,10 +64,10 @@ Kaoto edita el `*.camel.yaml`. [`scripts/sync.py`](scripts/sync.py) copia ese fl
 
 El archivo `*.camel.yaml` de cada lab es el que abre Kaoto. Hay dos formas de ejecutarlo:
 
-1. **Camel JBang en el workspace** (tareas **Local — …**). El proceso corre en el contenedor de Dev Spaces. No crea un Integration. Hello y HTTP no necesitan el cluster. Kafka usa solo el Deployment `kafka`. Granite y MCP llaman al predictor de OpenShift AI desde el workspace. El HTTP local usa el puerto **8081** porque el IDE ya ocupa el 8080.
-2. **Operador Camel K** (Pasos 1 a 5). `sync.py` copia el flujo al Integration y el operador construye la imagen en tu proyecto.
+1. **Camel JBang en el workspace** (tareas **Inner — …**). El proceso corre en el contenedor de Dev Spaces. No crea un Integration. Hello y HTTP no necesitan el cluster. Kafka usa solo el Deployment `kafka`. Granite y MCP llaman al predictor de OpenShift AI desde el workspace. El HTTP local usa el puerto **8081** porque el IDE ya ocupa el 8080.
+2. **Operador Camel K** (Outer — Hello … Outer — MCP). `sync.py` copia el flujo al Integration y el operador construye la imagen en tu proyecto.
 
-La instalación del CLI está en [Camel CLI — Getting Started](https://camel.apache.org/manual/camel-jbang-getting-started.html). Este workshop fija la versión 4.22.0 como en [Installation Options](https://camel.apache.org/manual/camel-jbang-installation.html). Las opciones de `camel run` están en [camel run](https://camel.apache.org/manual/jbang-commands/camel-jbang-run.html). La primera tarea Local que corras instala JBang y el CLI automáticamente (`source scripts/install-jbang.sh`). El home es efímero: si recreás el workspace, se vuelve a instalar con la primera tarea.
+La instalación del CLI está en [Camel CLI — Getting Started](https://camel.apache.org/manual/camel-jbang-getting-started.html). Este workshop fija la versión 4.22.0 como en [Installation Options](https://camel.apache.org/manual/camel-jbang-installation.html). Las opciones de `camel run` están en [camel run](https://camel.apache.org/manual/jbang-commands/camel-jbang-run.html). La primera tarea Inner que corras instala JBang y el CLI automáticamente (`source scripts/install-jbang.sh`). El home es efímero: si recreás el workspace, se vuelve a instalar con la primera tarea.
 
 ## Cuota y por qué hay un solo lab vivo
 
@@ -75,13 +75,13 @@ En el sandbox de referencia la cuota de pods largos es 3 CPU de request y 30Gi d
 
 Sin un `IntegrationPlatform` en tu proyecto, el operador publica la imagen del kit en el namespace `camel-k-operator`. Ese registry no acepta el pull de tu ServiceAccount, y el pod queda en `ImagePullBackOff`. [`scripts/platform.sh`](scripts/platform.sh) crea el IntegrationPlatform `camel-k` para que la imagen quede en un ImageStream de tu proyecto. El build usa la estrategia `routine` (corre dentro del operador) y publica con `S2I`. Un pod builder no sirve en este sandbox: el usuario no puede delegar `builds/status`, y sin eso el builder no puede cerrar el Build. `up.sh` corre ese script antes de cada lab. El primer build baja dependencias Maven y puede tardar varios minutos. No crea un pod de build en tu cuota.
 
-El workspace, un Integration y, en el paso 3, el broker entran juntos. Igual cada paso borra al anterior para no acumular Routes, pods ni el broker mientras avanzás. Antes de correr una tarea Local, conviene limpiar el lab del operador con **Paso 0** para no sumar dos JVMs de Camel a la cuota. La regla de cuota por proyecto está en [Resource quotas](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/working_with_quotas/quotas-setting-per-project-quotas). El artículo [Try Camel K in the Developer Sandbox](https://developers.redhat.com/articles/2023/03/30/try-camel-k-developer-sandbox-red-hat-openshift) muestra el mismo modelo: el operador vive fuera de tu proyecto y reacciona al Integration que creás. La configuración del registry está en [Camel K registry](https://camel.apache.org/camel-k/2.11.x/installation/registry.html) y en `oc explain integrationplatform.spec.build`.
+El workspace, un Integration y, en el paso 3, el broker entran juntos. Igual cada paso borra al anterior para no acumular Routes, pods ni el broker mientras avanzás. Antes de correr una tarea Inner, conviene limpiar el lab del operador con **Outer — Clean** para no sumar dos JVMs de Camel a la cuota. La regla de cuota por proyecto está en [Resource quotas](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/working_with_quotas/quotas-setting-per-project-quotas). El artículo [Try Camel K in the Developer Sandbox](https://developers.redhat.com/articles/2023/03/30/try-camel-k-developer-sandbox-red-hat-openshift) muestra el mismo modelo: el operador vive fuera de tu proyecto y reacciona al Integration que creás. La configuración del registry está en [Camel K registry](https://camel.apache.org/camel-k/2.11.x/installation/registry.html) y en `oc explain integrationplatform.spec.build`.
 
 Para ver el consumo en cualquier momento: **Terminal → Run Task… → Estado del proyecto**, o `bash scripts/status.sh`.
 
-Los recursos de los labs llevan `app.kubernetes.io/part-of=camel-k-workshop`. El Paso 0 borra Integrations, Deployments, Services, Routes, ConfigMaps y Secrets con esa etiqueta. No toca el IntegrationPlatform `camel-k`, los CamelCatalog ni el Service `modelmesh-serving`. El Paso 0 **no** detiene Camel JBang: para eso está **Local — Detener**.
+Los recursos de los labs llevan `app.kubernetes.io/part-of=camel-k-workshop`. **Outer — Clean** borra Integrations, Deployments, Services, Routes, ConfigMaps y Secrets con esa etiqueta. No toca el IntegrationPlatform `camel-k`, los CamelCatalog ni el Service `modelmesh-serving`. **Outer — Clean** **no** detiene Camel JBang: para eso está **Inner — Stop**.
 
-## Paso 1 — Hello
+## Outer — Hello
 
 **Objetivo.** Comprobar que el operador construye y levanta una Integration.
 
@@ -93,7 +93,7 @@ Los recursos de los labs llevan `app.kubernetes.io/part-of=camel-k-workshop`. El
 2. `setBody` fija el saludo.
 3. `log` lo escribe en stdout del pod.
 
-**Tarea.** Paso 1 — Hello. La misma ruta en el workspace: **Local — Hello** (el log sale en la terminal de la tarea, sin Deployment).
+**Tarea.** Outer — Hello. La misma ruta en el workspace: **Inner — Hello** (el log sale en la terminal de la tarea, sin Deployment).
 
 **Consola.** Topology → Deployment `hello` → pod → **Logs**. La línea esperada es `hello Hola desde Camel K en Developer Sandbox`. El primer build puede tardar varios minutos. La tarea espera la condición `Ready`.
 
@@ -110,7 +110,7 @@ Los recursos de los labs llevan `app.kubernetes.io/part-of=camel-k-workshop`. El
 
 Anotá `phase` e `image` que imprime la tarea, y en el log la línea `Apache Camel 4.22.0`. Los enlaces de componentes de esta guía son de esa línea.
 
-## Paso 2 — HTTP
+## Outer — HTTP
 
 **Objetivo.** Exponer una ruta con `platform-http` y abrirla desde la Route de OpenShift.
 
@@ -118,7 +118,7 @@ Anotá `phase` e `image` que imprime la tarea, y en el log la línea `Apache Cam
 
 **Ruta.** [`labs/02-http/hello.camel.yaml`](labs/02-http/hello.camel.yaml). `platform-http:/hello` acepta solo GET, fija `Content-Type` y devuelve `Hola desde platform-http`.
 
-**Tarea.** Paso 2 — HTTP. Reemplaza al Paso 1. En el workspace: **Local — HTTP** sirve el mismo YAML en `http://127.0.0.1:8081/hello` (sin Route de OpenShift).
+**Tarea.** Outer — HTTP. Reemplaza a Outer — Hello. En el workspace: **Inner — HTTP** sirve el mismo YAML en `http://127.0.0.1:8081/hello` (sin Route de OpenShift).
 
 **Consola.** Topology → nodo `http-hello` → la flecha de la Route abre `https://<route>/hello`. La tarea también hace ese `curl` y muestra el cuerpo.
 
@@ -132,7 +132,7 @@ Anotá `phase` e `image` que imprime la tarea, y en el log la línea `Apache Cam
 - [container](https://camel.apache.org/camel-k/next/traits/container.html): `expose` y `port` (el puerto por defecto del HTTP de Camel es 8080)
 - [choice EIP](https://camel.apache.org/components/4.22.x/eips/choice-eip.html) y el resto de los EIP en el [índice 4.22.x](https://camel.apache.org/components/4.22.x/index.html)
 
-## Paso 3 — Kafka
+## Outer — Kafka
 
 **Objetivo.** Publicar y consumir en un broker chico, sin instalar el operador de Strimzi. En este sandbox el usuario no tiene el CRD de Kafka de Strimzi.
 
@@ -144,7 +144,7 @@ Anotá `phase` e `image` que imprime la tarea, y en el log la línea `Apache Cam
 
 El listener de clientes es PLAINTEXT y solo se anuncia dentro del namespace (`advertised.listeners=PLAINTEXT://kafka:9092`). El controller de KRaft escucha en `127.0.0.1:9093`: Kafka 3.9 rechaza `0.0.0.0` como dirección anunciada del controller. No lo expongas con una Route.
 
-**Tarea.** Paso 3 — Kafka. La tarea espera el rollout del broker y después la Integration. En el workspace: **Local — Kafka** sube solo el broker y corre `orders.camel.yaml` con JBang (sin Integration `orders`).
+**Tarea.** Outer — Kafka. La tarea espera el rollout del broker y después la Integration. En el workspace: **Inner — Kafka** sube solo el broker y corre `orders.camel.yaml` con JBang (sin Integration `orders`).
 
 **Consola.** Topology muestra el Deployment `kafka` y el Deployment `orders`. En los logs de `orders` tienen que aparecer `publicado pedido A-100` y `pedido recibido pedido A-100`. La primera línea del consumer puede tardar hasta el primer tick de 15 segundos, después de la espera inicial.
 
@@ -154,10 +154,10 @@ El listener de clientes es PLAINTEXT y solo se anuncia dentro del namespace (`ad
 
 - [kafka component](https://camel.apache.org/components/4.22.x/kafka-component.html): `brokers`, `groupId`, `autoOffsetReset`, consumidores y productores
 - [KRaft](https://kafka.apache.org/documentation/#kraft): modo del broker de un nodo, sin ZooKeeper
-- [direct](https://camel.apache.org/components/4.22.x/direct-component.html) queda para el Paso 5, cuando una ruta llama a otra dentro del mismo proceso
+- [direct](https://camel.apache.org/components/4.22.x/direct-component.html) queda para Outer — MCP, cuando una ruta llama a otra dentro del mismo proceso
 - [builder](https://camel.apache.org/camel-k/next/traits/builder.html): estrategias `routine` y `pod`, y los requests del build si alguna vez pasás a `pod`
 
-## Paso 4 — Granite
+## Outer — Granite
 
 **Objetivo.** Llamar desde la Integration a un modelo que ya sirve OpenShift AI, sin desplegar un modelo en tu proyecto. Tu cuota de GPU es 0.
 
@@ -167,7 +167,7 @@ El listener de clientes es PLAINTEXT y solo se anuncia dentro del namespace (`ad
 
 Esa URL solo resuelve dentro del cluster. La Route del lab es la que abrís desde la consola. El recorrido de los modelos del sandbox está en [Get started with consuming GPU-hosted large language models on Developer Sandbox](https://developers.redhat.com/learn/ai/get-started-consuming-gpu-hosted-large-language-models-developer-sandbox) y el `curl` de referencia en [Interact with the hosted models using curl](https://developers.redhat.com/learning/learn:ai:get-started-consuming-gpu-hosted-large-language-models-developer-sandbox/resource/resources:interact-hosted-models-using-curl).
 
-**Objetos.** Secret `sandbox-llm-token` (lo crea la tarea con `oc whoami -t`; no está en git y el Paso 0 lo borra) e Integration `granite`. El trait [environment](https://camel.apache.org/camel-k/next/traits/environment.html) inyecta `LLM_TOKEN=secret:sandbox-llm-token/token`. El token del sandbox vence: si `/ask` responde 401, volvé a correr el Paso 4.
+**Objetos.** Secret `sandbox-llm-token` (lo crea la tarea con `oc whoami -t`; no está en git y Outer — Clean lo borra) e Integration `granite`. El trait [environment](https://camel.apache.org/camel-k/next/traits/environment.html) inyecta `LLM_TOKEN=secret:sandbox-llm-token/token`. El token del sandbox vence: si `/ask` responde 401, volvé a correr Outer — Granite.
 
 **Ruta.** [`labs/04-granite/ask.camel.yaml`](labs/04-granite/ask.camel.yaml)
 
@@ -178,7 +178,7 @@ Esa URL solo resuelve dentro del cluster. La Route del lab es la que abrís desd
 
 **TLS.** El predictor presenta un certificado firmado por la CA de servicio de OpenShift. Esa CA está en cada pod en `/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt`. [`platform/SandboxTrust.java`](platform/SandboxTrust.java) la carga en un `SSLContextParameters` registrado como `sandboxSsl`. No desactiva la verificación del nombre. El trait [mount](https://camel.apache.org/camel-k/next/traits/mount.html) sirve para montar otros ConfigMaps o Secrets; este archivo ya viene montado por OpenShift.
 
-**Tarea.** Paso 4 — Granite. La tarea hace `curl` a `/ask` y muestra el texto del modelo. La primera respuesta puede tardar. En el workspace: **Local — Granite** usa el mismo YAML y `SandboxTrust.java` en el puerto 8081; el token va en la variable de entorno del proceso, no a un Secret.
+**Tarea.** Outer — Granite. La tarea hace `curl` a `/ask` y muestra el texto del modelo. La primera respuesta puede tardar. En el workspace: **Inner — Granite** usa el mismo YAML y `SandboxTrust.java` en el puerto 8081; el token va en la variable de entorno del proceso, no a un Secret.
 
 **Ejemplos de queries.** Probá desde la consola o desde otra terminal del workspace:
 
@@ -204,7 +204,7 @@ Para apuntar a Qwen o a Nemotron, cambiá el id y el host en el `setBody` y en e
 - Qwen 3 8B: `isvc-qwen3-8b-fp8` en `https://isvc-qwen3-8b-fp8-predictor.sandbox-shared-models.svc.cluster.local:8443/v1/chat/completions`
 - Nemotron Nano 9B v2: `isvc-nemotron-nano-9b-v2-fp8` en `https://isvc-nemotron-nano-9b-v2-fp8-predictor.sandbox-shared-models.svc.cluster.local:8443/v1/chat/completions`
 
-## Paso 5 — MCP
+## Outer — MCP
 
 **Objetivo.** Publicar una ruta como herramienta MCP y usar el mismo estado como contexto de Granite.
 
@@ -216,14 +216,14 @@ Camel 4.22 trae [MCP Server](https://camel.apache.org/components/4.22.x/others/m
 - `ai-tool:order-status` (tag `orders`) toma `orderId` del header y llama a `direct:order-status`. Esa es la herramienta MCP.
 - `platform-http:/ask` llama la misma lógica (por defecto `A-100`, o `?orderId=B-200`) y le pide a Granite una frase.
 
-**Tarea.** Paso 5 — MCP. Imprime `initialize`, `tools/list`, `tools/call` de `A-100` y el `GET /ask?orderId=B-200`. En el workspace: **Local — MCP** usa `--runtime=quarkus` para fijar `quarkus.camel.mcp-server.tags=orders` al construir. El proceso queda en primer plano; probá `curl http://127.0.0.1:8081/mcp` desde otra terminal.
+**Tarea.** Outer — MCP. Imprime `initialize`, `tools/list`, `tools/call` de `A-100` y el `GET /ask?orderId=B-200`. En el workspace: **Inner — MCP** usa `--runtime=quarkus` para fijar `quarkus.camel.mcp-server.tags=orders` al construir. El proceso queda en primer plano; probá `curl http://127.0.0.1:8081/mcp` desde otra terminal.
 
-**Probar MCP manualmente.** La tarea del Paso 5 hace estos curls automáticamente. Para probar desde otra terminal (cambiá `HOST` por la Route del cluster o `127.0.0.1:8081` en Local):
+**Probar MCP manualmente.** La tarea Outer — MCP hace estos curls automáticamente. Para probar desde otra terminal (cambiá `HOST` por la Route del cluster o `127.0.0.1:8081` en Inner):
 
 ```bash
 # Variable con el host (operador)
 HOST=$(oc get route/mcp -o jsonpath='{.spec.host}')
-# O para Local — MCP:  HOST=127.0.0.1:8081
+# O para Inner — MCP:  HOST=127.0.0.1:8081
 
 # 1. initialize — devuelve capabilities y el Mcp-Session-Id
 curl -ksS -D /tmp/mcp-hdr \
@@ -255,7 +255,7 @@ curl -ksS \
 curl -ksS --max-time 180 "https://${HOST}/ask?orderId=B-200"
 ```
 
-| Paso | Respuesta esperada |
+| Llamada | Respuesta esperada |
 | --- | --- |
 | `initialize` | `serverInfo.name` = `camel-k-workshop`, `capabilities.tools` presente |
 | `tools/list` | Herramienta `order-status` con parámetro `orderId` |
@@ -279,29 +279,29 @@ Si `tools/list` viene vacío, el tag `orders` no llegó al build. Buscá en el l
 
 ## Si algo no levanta
 
-**Pod Pending.** `oc describe pod <nombre>` y la cuota: `oc get resourcequota compute-deploy`. Un workspace más el broker más una Integration entra en la cuota de referencia. Si hay otro Deployment tuyo, corré el Paso 0 o **Dev Spaces: Stop Workspace** desde la barra de estado antes de volver a entrar.
+**Pod Pending.** `oc describe pod <nombre>` y la cuota: `oc get resourcequota compute-deploy`. Un workspace más el broker más una Integration entra en la cuota de referencia. Si hay otro Deployment tuyo, corré Outer — Clean o **Dev Spaces: Stop Workspace** desde la barra de estado antes de volver a entrar.
 
 **Integration en Error.** `oc describe integration <nombre>` y `oc describe build.camel.apache.org`. El mensaje queda en `status.error` del Build. La referencia de fases está en [Running an Integration](https://camel.apache.org/camel-k/next/running/running.html).
 
 **ImagePullBackOff.** La imagen del kit se publicó en `camel-k-operator`. Volvé a correr el paso: `scripts/platform.sh` deja el IntegrationPlatform `camel-k` en tu proyecto para que el ImageStream sea local. No borres ese IntegrationPlatform.
 
-**401 del modelo.** El token venció. Volvé a correr el Paso 4 o el 5 (o Local — Granite / Local — MCP). La tarea recrea el Secret o exporta `LLM_TOKEN` otra vez.
+**401 del modelo.** El token venció. Volvé a correr Outer — Granite o Outer — MCP (o Inner — Granite / Inner — MCP). La tarea recrea el Secret o exporta `LLM_TOKEN` otra vez.
 
-**PKIX o hostname en el Paso 4 o 5.** El predictor no presentó la CA de `service-ca.crt`, o el nombre del certificado no coincide con el host del Service. El mensaje queda en el log de la Integration y en el cuerpo de `/ask`.
+**PKIX o hostname en Outer — Granite o Outer — MCP.** El predictor no presentó la CA de `service-ca.crt`, o el nombre del certificado no coincide con el host del Service. El mensaje queda en el log de la Integration y en el cuerpo de `/ask`.
 
 **Kaoto no aparece.** El registry embebido de Dev Spaces a veces no tiene `redhat.vscode-kaoto`. Instalá el VSIX desde [Open VSX](https://open-vsx.org/extension/redhat/vscode-kaoto). La lista de formatos que abre el editor está en la [documentación de Kaoto](https://kaoto.io/docs/).
 
 **La Route no abre.** `oc get route`. El host es el de tu proyecto. Sumá el path (`/hello`, `/ask` o `/mcp`).
 
-**Camel JBang no está.** La primera tarea Local lo instala. Para instalarlo manualmente, abrí una terminal y corré: `source scripts/install-jbang.sh`.
+**Camel JBang no está.** La primera tarea Inner lo instala. Para instalarlo manualmente, abrí una terminal y corré: `source scripts/install-jbang.sh`.
 
-**Puerto 8080 ocupado.** Las tareas Local HTTP, Granite y MCP usan el **8081**. No uses `--port 8080` en el workspace: ahí escucha el IDE.
+**Puerto 8080 ocupado.** Las tareas Inner HTTP, Granite y MCP usan el **8081**. No uses `--port 8080` en el workspace: ahí escucha el IDE.
 
-**OOM en el workspace.** El contenedor limita a 4Gi. Detené JBang con **Local — Detener** y bajá el lab del operador con el Paso 0 antes de volver a correr Local — MCP (el build Quarkus es el más pesado).
+**OOM en el workspace.** El contenedor limita a 4Gi. Detené JBang con **Inner — Stop** y bajá el lab del operador con Outer — Clean antes de volver a correr Inner — MCP (el build Quarkus es el más pesado).
 
-**`tools/list` vacío en Local — MCP.** El tag `orders` no llegó al build Quarkus. Revisá que el comando incluya `--property=quarkus.camel.mcp-server.tags=orders` (mirá el `devfile.yaml`).
+**`tools/list` vacío en Inner — MCP.** El tag `orders` no llegó al build Quarkus. Revisá que el comando incluya `--property=quarkus.camel.mcp-server.tags=orders` (mirá el `devfile.yaml`).
 
-**Paso 0 no detiene JBang.** El Paso 0 solo borra recursos del cluster con la etiqueta del workshop. Para el proceso local usá **Local — Detener**.
+**Outer — Clean no detiene JBang.** Solo borra recursos del cluster con la etiqueta del workshop. Para el proceso local usá **Inner — Stop**.
 
 ## Índice de documentación
 

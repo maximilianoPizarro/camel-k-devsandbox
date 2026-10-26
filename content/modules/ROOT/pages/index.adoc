@@ -2,7 +2,7 @@
 
 == Workshop Overview
 
-You will design Apache Camel routes visually with Kaoto, run them instantly inside OpenShift Dev Spaces with Camel JBang (**Inner Loop**), then deploy the same YAML with the Camel K operator (**Outer Loop**). Along the way you call a Kafka broker, an OpenShift AI model, and publish an MCP tool.
+You will design Apache Camel routes visually with Kaoto, run them instantly inside OpenShift Dev Spaces with Camel JBang (**Inner Loop**), then deploy the same YAML with the Camel K operator (**Outer Loop — Deploy**). Along the way you call a Kafka broker, an OpenShift AI model, and publish an MCP tool.
 
 This is a hands-on workshop on Apache Camel K, Camel JBang, Kaoto, and OpenShift AI on the Red Hat Developer Sandbox.
 
@@ -12,22 +12,43 @@ This is a hands-on workshop on Apache Camel K, Camel JBang, Kaoto, and OpenShift
 *Repo:* {repo_url}
 ****
 
+[IMPORTANT]
+====
+This workshop covers the Outer Loop *through deploy*: apply an Integration, let the operator build a kit, run a pod, and optionally expose a Route.
+It does *not* cover CI/CD pipelines or GitOps promotion (OpenShift Pipelines, OpenShift GitOps). Those are the natural next step after you leave the sandbox; see the xref:12-summary.adoc[Wrap-up].
+====
+
 == Inner Loop and Outer Loop
 
 Every lab uses the same `*.camel.yaml` file. First you run it in the workspace; then you apply it as an Integration.
 
 image::inner-outer-loop.jpg[Inner Loop and Outer Loop,width=100%]
 
-[cols="1,2"]
+[cols="1,1,1,1,1,1,1"]
 |===
-|Loop |What it means
+|Loop |Where it runs |What you get |Feedback time |Tool |How you verify |How you clean
 
 |*Inner Loop*
-|Edit the route in Kaoto, run `camel run` in the Dev Spaces terminal. No image build. Fast feedback on port `8081` (or logs for timer routes).
+|Dev Spaces container
+|Process from `camel run` (logs or HTTP on `8081`)
+|Seconds
+|*Terminal → Run Task… → Inner — …* (or `camel run` in a terminal)
+|Terminal logs or `curl http://127.0.0.1:8081/...`
+|*Inner — Stop* (`camel stop`)
 
-|*Outer Loop*
-|`scripts/up.sh` syncs the YAML into an Integration CR. The Camel K operator builds a kit (S2I, routine), deploys a pod, and may expose an OpenShift Route.
+|*Outer Loop — Deploy*
+|Your `*-dev` project
+|Integration, kit image, pod, optional Route
+|Minutes on the first kit build
+|*Terminal → Run Task… → Outer — …* (`scripts/up.sh`)
+|Topology, pod logs, `curl` to the Route
+|*Outer — Clean* (`scripts/down.sh`)
 |===
+
+[NOTE]
+====
+*Quota:* keep one lab alive at a time. The workspace already counts against project quota. Add at most one Integration, and for Kafka also the broker Deployment. Outer tasks call `down.sh` first; before Inner HTTP or AI labs, run *Outer — Clean* if an Integration is still up.
+====
 
 == Architecture
 
@@ -44,7 +65,7 @@ image::camel-architecture.jpg[Camel Day Roadshow architecture,width=100%]
 |Inner Loop runtime: `camel run` on the same YAML
 
 |Camel K operator 2.11
-|Outer Loop: watches Integrations, builds kits, deploys pods
+|Outer Loop — Deploy: watches Integrations, builds kits, deploys pods
 
 |Apache Kafka (KRaft)
 |Single-broker Deployment for the orders lab (no Strimzi CRD needed)

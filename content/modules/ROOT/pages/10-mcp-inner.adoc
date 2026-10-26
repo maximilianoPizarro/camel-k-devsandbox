@@ -2,8 +2,14 @@
 
 ****
 *Duration:* 15 min +
-*Goal:* Run the MCP server with Camel JBang Quarkus runtime so `quarkus.camel.mcp-server.tags=orders` is fixed at build time.
+*Goal:* Run the MCP server with Camel JBang Quarkus runtime so `quarkus.camel.mcp-server.tags=orders` is fixed at build time. +
+*Dev Spaces task:* *Inner — MCP*
 ****
+
+[IMPORTANT]
+====
+If an Integration is still running, clean it first: *Outer — Clean*.
+====
 
 image::module-mcp.jpg[MCP tools and Granite,width=100%]
 
@@ -32,7 +38,7 @@ camel run labs/05-mcp/mcp.camel.yaml platform/SandboxTrust.java \
   --java-version=17 --jvm-args=-Xmx1024m --port=8081
 ----
 
-Or *Local — MCP*. The first Quarkus export/build can take several minutes.
+Or *Inner — MCP*. The first Quarkus export/build can take several minutes.
 
 == Probe MCP (second terminal)
 

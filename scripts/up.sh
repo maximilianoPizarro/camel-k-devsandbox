@@ -16,7 +16,7 @@ Labs:
   05-mcp
 
 El lab anterior se borra antes de aplicar este.
-En Dev Spaces: Terminal -> Run Task... y elegi el Paso.
+En Dev Spaces: Terminal -> Run Task... y elegi Outer — …
 EOF
 }
 
@@ -185,5 +185,5 @@ if [[ "$LAB" == "05-mcp" ]]; then
 fi
 
 echo
-echo "Lab ${LAB} activo. El Paso siguiente lo reemplaza."
-echo "Para apagarlo: Terminal -> Run Task... -> Paso 0 — Limpiar el lab activo"
+echo "Lab ${LAB} activo. La tarea Outer siguiente lo reemplaza."
+echo "Para apagarlo: Terminal -> Run Task... -> Outer — Clean"

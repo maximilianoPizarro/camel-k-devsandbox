@@ -14,11 +14,38 @@
 |*Inner Loop*
 |Kaoto canvas, `camel run`, port 8081, JBang Quarkus for MCP tags, curl against localhost
 
-|*Outer Loop*
+|*Outer Loop — Deploy*
 |Integration CR, IntegrationPlatform (routine + S2I), Routes with edge TLS, Secrets for LLM token, builder traits
 |===
 
 The shared artifact is always the lab `*.camel.yaml`.
+
+== What changes between loops (all labs)
+
+[cols="1,2,2"]
+|===
+|Lab |Inner |Outer
+
+|Hello
+|Logs in the `camel run` terminal
+|Pod `hello`, container logs in Topology
+
+|HTTP
+|Port 8081, `curl` to localhost
+|Port 8080 in the pod, Route HTTPS with edge TLS
+
+|Kafka
+|`camel run` against Service `kafka` (broker only)
+|Integration `orders` plus the broker
+
+|Granite
+|`LLM_TOKEN` in the process environment
+|Secret + trait `environment`
+
+|MCP
+|`--runtime=quarkus` and `--property` / `--dep` flags
+|Trait `builder` + `mvn:` dependencies
+|===
 
 == Clean up
 
@@ -29,7 +56,7 @@ Outer Loop resources (Integrations, Kafka Deployment, Secrets labeled for the wo
 bash scripts/down.sh
 ----
 
-Or *Paso 0 — Limpiar el lab activo*. Does **not** stop Camel JBang.
+Or *Outer — Clean*. Does *not* stop Camel JBang.
 
 Inner Loop process:
 
@@ -38,9 +65,18 @@ Inner Loop process:
 camel stop
 ----
 
-Or *Local — Detener*.
+Or *Inner — Stop*.
 
 Leave the IntegrationPlatform `camel-k`, CamelCatalogs, and `modelmesh-serving` Service in place.
+
+== Beyond this workshop
+
+This roadshow stops at *Outer Loop — Deploy*. A fuller Outer Loop would add:
+
+* *Automate* -- Git commit, OpenShift Pipelines (Tekton), and/or OpenShift GitOps (Argo CD) to promote the same YAML
+* *Operate* -- health, metrics, build logs, and day-2 actions on the Integration
+
+Those steps need more quota and cluster features than the Developer Sandbox workshop assumes.
 
 == Keep exploring
 
@@ -49,6 +85,8 @@ Leave the IntegrationPlatform `camel-k`, CamelCatalogs, and `modelmesh-serving` 
 * link:https://kaoto.io/docs/[Kaoto]
 * link:https://camel.apache.org/manual/camel-jbang.html[Camel JBang]
 * link:https://docs.redhat.com/en/documentation/red_hat_openshift_dev_spaces/3.28[OpenShift Dev Spaces]
+* link:https://docs.redhat.com/en/documentation/red_hat_openshift_pipelines[OpenShift Pipelines]
+* link:https://docs.redhat.com/en/documentation/red_hat_openshift_gitops[OpenShift GitOps]
 * Workshop source: {repo_url}
 
 Thank you for joining the Red Hat Apache Camel Day Roadshow.

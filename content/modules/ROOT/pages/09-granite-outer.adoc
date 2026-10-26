@@ -2,10 +2,24 @@
 
 ****
 *Duration:* 10 min +
-*Goal:* Deploy Integration `granite` with Secret `sandbox-llm-token` and an OpenShift Route to `/ask`.
+*Goal:* Deploy Integration `granite` with Secret `sandbox-llm-token` and an OpenShift Route to `/ask`. +
+*Dev Spaces task:* *Outer — Granite*
 ****
 
+[IMPORTANT]
+====
+Stop the Inner Loop first: *Inner — Stop* (`camel stop`).
+====
+
 image::module-granite.jpg[Granite ask flow,width=100%]
+
+[NOTE]
+====
+*What changes from the Inner Loop*
+
+* *Inner:* `export LLM_TOKEN=$(oc whoami -t)` in the process environment; HTTP on port 8081.
+* *Outer:* Secret `sandbox-llm-token` + trait `environment`; Route HTTPS; same `SandboxTrust.java` in the kit.
+====
 
 == Deploy
 
@@ -14,7 +28,7 @@ image::module-granite.jpg[Granite ask flow,width=100%]
 bash scripts/up.sh 04-granite
 ----
 
-Or *Paso 4 — Granite*. Creates the Secret from `oc whoami -t` (not in git). Trait `environment` injects `LLM_TOKEN`.
+Or *Outer — Granite*. Creates the Secret from `oc whoami -t` (not in git). Trait `environment` injects `LLM_TOKEN`.
 
 The route strips `CamelHttp*` and `Host`, then POSTs with `bridgeEndpoint=true` and `#sandboxSsl`. Without that, the model returns 404.
 
@@ -34,7 +48,7 @@ curl -k "https://${HOST}/ask?q=Escribe+una+ruta+Apache+Camel+en+YAML+que+lea+de+
 curl -k "https://${HOST}/ask?q=Que+ventaja+tiene+publicar+una+integracion+como+herramienta+MCP+en+lugar+de+API+REST"
 ----
 
-If you get 401, the token expired — re-run the Paso 4 task.
+If you get 401, the token expired — re-run *Outer — Granite*.
 
 == Docs
 

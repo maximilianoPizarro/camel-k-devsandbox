@@ -2,10 +2,24 @@
 
 ****
 *Duration:* 10 min +
-*Goal:* Deploy Integration `orders` against the same KRaft broker. Topology shows two Deployments.
+*Goal:* Deploy Integration `orders` against the same KRaft broker. Topology shows two Deployments. +
+*Dev Spaces task:* *Outer — Kafka*
 ****
 
+[IMPORTANT]
+====
+Stop the Inner Loop first: *Inner — Stop* (`camel stop`).
+====
+
 image::module-kafka.jpg[Kafka orders produce and consume,width=100%]
+
+[NOTE]
+====
+*What changes from the Inner Loop*
+
+* *Inner:* only the broker Deployment; Camel runs in the workspace against Service `kafka:9092`.
+* *Outer:* Integration `orders` is a second Deployment; produce/consume logs come from the Integration pod.
+====
 
 == Deploy
 
@@ -14,7 +28,7 @@ image::module-kafka.jpg[Kafka orders produce and consume,width=100%]
 bash scripts/up.sh 03-kafka
 ----
 
-Or *Paso 3 — Kafka*. Applies the broker, waits for rollout, then the Integration.
+Or *Outer — Kafka*. Applies the broker, waits for rollout, then the Integration.
 
 == What to look for
 

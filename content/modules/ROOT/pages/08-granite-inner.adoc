@@ -2,8 +2,14 @@
 
 ****
 *Duration:* 10 min +
-*Goal:* Call the shared Granite predictor from Camel JBang using `SandboxTrust.java` and your sandbox token.
+*Goal:* Call the shared Granite predictor from Camel JBang using `SandboxTrust.java` and your sandbox token. +
+*Dev Spaces task:* *Inner — Granite*
 ****
+
+[IMPORTANT]
+====
+If an Integration is still running, clean it first: *Outer — Clean*.
+====
 
 image::module-granite.jpg[Granite ask flow,width=100%]
 
@@ -30,7 +36,7 @@ camel run labs/04-granite/ask.camel.yaml platform/SandboxTrust.java \
   --java-version=17 --jvm-args=-Xmx1024m --port=8081
 ----
 
-Or *Local — Granite*. From another terminal:
+Or *Inner — Granite*. From another terminal:
 
 [source,bash]
 ----

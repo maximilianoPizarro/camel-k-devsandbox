@@ -2,10 +2,24 @@
 
 ****
 *Duration:* 15 min +
-*Goal:* Deploy Integration `mcp` with build-time tags via the builder trait and exercise `/mcp` and `/ask` on the Route.
+*Goal:* Deploy Integration `mcp` with build-time tags via the builder trait and exercise `/mcp` and `/ask` on the Route. +
+*Dev Spaces task:* *Outer — MCP*
 ****
 
+[IMPORTANT]
+====
+Stop the Inner Loop first: *Inner — Stop* (`camel stop`).
+====
+
 image::module-mcp.jpg[MCP tools and Granite,width=100%]
+
+[NOTE]
+====
+*What changes from the Inner Loop*
+
+* *Inner:* `--runtime=quarkus` plus `--property=quarkus.camel.mcp-server.tags=orders` and `--dep` on the command line; probe `127.0.0.1:8081`.
+* *Outer:* trait `builder.properties` for the same tag; dependencies as `mvn:` on the Integration; Route HTTPS for `/mcp` and `/ask`.
+====
 
 == Deploy
 
@@ -16,7 +30,7 @@ Dependencies use `mvn:` coordinates so the sandbox CamelCatalog (3.15.3 names) d
 bash scripts/up.sh 05-mcp
 ----
 
-Or *Paso 5 — MCP*. The task prints initialize, tools/list, tools/call, and `/ask`.
+Or *Outer — MCP*. The task prints initialize, tools/list, tools/call, and `/ask`.
 
 == Manual curls against the Route
 

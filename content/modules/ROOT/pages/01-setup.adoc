@@ -21,7 +21,7 @@ Dev Spaces loads link:{repo_url}/blob/master/devfile.yaml[`devfile.yaml`]. Tasks
 
 == Three views of every lab
 
-* *Task / terminal* -- Inner Loop: `camel run`. Outer Loop: `bash scripts/up.sh …`.
+* *Task / terminal* -- Inner Loop: *Inner — …* (`camel run`). Outer Loop: *Outer — …* (`bash scripts/up.sh …`).
 * *OpenShift Console* -- Status bar → *Dev Spaces → Open OpenShift Console* → Developer → Topology.
 * *Kaoto* -- Open the lab's `*.camel.yaml`. Extension `redhat.vscode-kaoto` is recommended.
 
@@ -54,7 +54,7 @@ Or *Terminal → Run Task… → Estado del proyecto*.
 
 == Quota tip
 
-Keep one lab running at a time. Outer Loop tasks call `scripts/down.sh` first. Before Inner Loop HTTP/AI labs, run *Paso 0 — Limpiar el lab activo* so you do not stack an Integration and a local JVM.
+Keep one lab running at a time. Outer tasks call `scripts/down.sh` first. Before Inner HTTP/AI labs, run *Outer — Clean* so you do not stack an Integration and a local JVM.
 
 == Next
 
