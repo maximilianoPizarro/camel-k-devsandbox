@@ -130,8 +130,13 @@ fi
 
 if [[ "$LAB" == "04-granite" ]]; then
   echo
+  echo "-- GET /ask (pregunta por defecto: Content-Based Router) --"
   curl -kfsS --max-time 180 "https://${HOST}/ask"
   echo
+  echo
+  echo "Probá otras preguntas:"
+  echo "  curl -k \"https://${HOST}/ask?q=Escribe+una+ruta+Apache+Camel+en+YAML+que+lea+de+Kafka+y+escriba+en+un+log\""
+  echo "  curl -k \"https://${HOST}/ask?q=Que+hace+el+componente+platform-http+de+Apache+Camel\""
 fi
 
 if [[ "$LAB" == "05-mcp" ]]; then

@@ -17,7 +17,7 @@
               steps:
                 - setVariable:
                     name: question
-                    constant: "En una frase, que modelo de OpenShift AI sos?"
+                    constant: "Explica el patron Content-Based Router de Enterprise Integration Patterns en dos frases"
         - removeHeaders:
             pattern: "CamelHttp*"
         - removeHeader:

@@ -171,7 +171,7 @@ Esa URL solo resuelve dentro del cluster. La Route del lab es la que abrís desd
 
 **Ruta.** [`labs/04-granite/ask.camel.yaml`](labs/04-granite/ask.camel.yaml)
 
-1. `GET /ask` usa la pregunta por defecto. `GET /ask?q=Hola` usa el query. Escribí `q` en texto plano, sin comillas dobles: el cuerpo JSON se arma con esa cadena.
+1. `GET /ask` usa la pregunta por defecto: *Explica el patrón Content-Based Router de Enterprise Integration Patterns en dos frases*. `GET /ask?q=...` usa el query que le pases. Escribí `q` en texto plano, sin comillas dobles: el cuerpo JSON se arma con esa cadena. El modelo no tiene reloj ni internet: preguntas como "qué hora es" van a fallar.
 2. Arma un chat completion de la API compatible con OpenAI.
 3. Borra los headers `CamelHttp*` y `Host` que llegaron con el GET, y hace POST al predictor con el Bearer, el bean `sandboxSsl` y `bridgeEndpoint=true`. Si no, el componente HTTP reenvía el path `/ask` o el host de la Route y el modelo responde 404. La opción está en [http](https://camel.apache.org/components/4.22.x/http-component.html).
 4. Si el HTTP es 200, devuelve `choices[0].message.content`. Si no, devuelve el código y el cuerpo.
@@ -179,6 +179,14 @@ Esa URL solo resuelve dentro del cluster. La Route del lab es la que abrís desd
 **TLS.** El predictor presenta un certificado firmado por la CA de servicio de OpenShift. Esa CA está en cada pod en `/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt`. [`platform/SandboxTrust.java`](platform/SandboxTrust.java) la carga en un `SSLContextParameters` registrado como `sandboxSsl`. No desactiva la verificación del nombre. El trait [mount](https://camel.apache.org/camel-k/next/traits/mount.html) sirve para montar otros ConfigMaps o Secrets; este archivo ya viene montado por OpenShift.
 
 **Tarea.** Paso 4 — Granite. La tarea hace `curl` a `/ask` y muestra el texto del modelo. La primera respuesta puede tardar. En el workspace: **Local — Granite** usa el mismo YAML y `SandboxTrust.java` en el puerto 8081; el token va en la variable de entorno del proceso, no a un Secret.
+
+**Ejemplos de queries.** Probá desde la consola o desde otra terminal del workspace:
+
+```
+curl -k "https://<route>/ask?q=Escribe+una+ruta+Apache+Camel+en+YAML+que+lea+de+Kafka+y+escriba+en+un+log"
+curl -k "https://<route>/ask?q=Que+ventaja+tiene+publicar+una+integracion+como+herramienta+MCP+en+lugar+de+API+REST"
+curl -k "https://<route>/ask?q=Que+hace+el+componente+platform-http+de+Apache+Camel"
+```
 
 **Consola.** Abrí la flecha de la Route. La raíz no es `/ask`: sumá `/ask` al final de la URL.
 
