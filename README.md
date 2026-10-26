@@ -1,3 +1,12 @@
+[![Open](https://img.shields.io/static/v1?label=Open%20in&message=Developer%20Sandbox&logo=eclipseche&color=FDB940&labelColor=525C86)](https://workspaces.openshift.com/#https://github.com/maximilianoPizarro/camel-k-devsandbox/tree/master?storageType=ephemeral)
+
+<p align="left">
+<img src="https://img.shields.io/badge/redhat-CC0000?style=for-the-badge&logo=redhat&logoColor=white" alt="Red Hat">
+<img src="https://img.shields.io/badge/OpenShift-EE0000?style=for-the-badge&logo=redhatopenshift&logoColor=white" alt="OpenShift">
+<img src="https://img.shields.io/badge/Apache%20Camel-FFDD00?style=for-the-badge&logo=apachecamel&logoColor=black" alt="Apache Camel">
+<img src="https://img.shields.io/badge/Apache%20Kafka-231F20?style=for-the-badge&logo=apachekafka&logoColor=white" alt="Apache Kafka">
+</p>
+
 # Camel K en Developer Sandbox
 
 Workshop para recorrer Apache Camel K dentro de un workspace de [OpenShift Dev Spaces](https://docs.redhat.com/en/documentation/red_hat_openshift_dev_spaces/3.28/html/user_guide/assembly_getting-started_user_guide) en el mismo [Developer Sandbox](https://developers.redhat.com/developer-sandbox). Cada paso es una tarea del `devfile.yaml`. El paso siguiente borra el anterior, así en el proyecto queda un solo ejemplo vivo.
@@ -15,15 +24,26 @@ El operador Camel K ya está instalado en el sandbox y observa tu proyecto. Esto
 | 4 | Paso 4 — Granite | Integration `granite`, Secret del token y Route | Texto del modelo en `GET /ask` |
 | 5 | Paso 5 — MCP | Integration `mcp`, Secret del token y Route | `tools/list`, `tools/call` y `GET /ask` |
 
-El workspace de Dev Spaces también es un pod de tu proyecto y cuenta en la misma cuota. El devfile pide 512Mi / 200m de request y limita el contenedor a 2Gi / 1 CPU.
+### Misma ruta, en el workspace (Camel JBang)
+
+| Tarea | Qué corre | Qué mirar |
+| --- | --- | --- |
+| Local — Instalar Camel JBang | JBang y el Camel CLI 4.22.0 en el home del workspace | `camel version` |
+| Local — Hello | `labs/01-hello/hello.camel.yaml` en el contenedor | Log en la terminal de la tarea |
+| Local — HTTP | La ruta HTTP en el puerto **8081** | `curl` a `http://127.0.0.1:8081/hello` |
+| Local — Kafka | Solo el Deployment `kafka` + `orders.camel.yaml` en JBang | Log `pedido recibido pedido A-100` |
+| Local — Granite | `ask.camel.yaml` + `SandboxTrust.java` en 8081 | Texto del modelo en `/ask` |
+| Local — MCP | `mcp.camel.yaml` con runtime Quarkus en 8081 | `tools/list`, `tools/call` y `/ask` |
+| Local — Detener | Para el proceso JBang | `camel ps` vacío |
+
+El workspace de Dev Spaces también es un pod de tu proyecto y cuenta en la misma cuota. El devfile pide 512Mi / 200m de request y limita el contenedor a 4Gi / 2 CPU (el IDE más Camel JBang).
 
 ## Abrir el repo en Dev Spaces
 
-1. Entrá al Developer Sandbox y abrí la consola de OpenShift.
-2. En el lanzador de aplicaciones (los nueve puntos) abrí **OpenShift Dev Spaces**.
-3. **Create Workspace** y pegá la URL de este repo: `https://github.com/maximilianoPizarro/camel-k-devsandbox`.
-4. Dev Spaces lee el [`devfile.yaml`](devfile.yaml) de la raíz y clona el repo en el workspace. La guía de ese flujo está en [Get started with OpenShift Dev Spaces](https://docs.redhat.com/en/documentation/red_hat_openshift_dev_spaces/3.28/html/user_guide/assembly_getting-started_user_guide).
-5. Esperá a que el workspace arranque. `oc whoami` y `oc project` ya apuntan a tu usuario y a tu proyecto `*-dev`. No copies un token dentro del repo ni del README.
+1. Pulsá el botón **Open in Developer Sandbox** arriba, o entrá al Developer Sandbox, abrí la consola de OpenShift y, en el lanzador de aplicaciones (los nueve puntos), abrí **OpenShift Dev Spaces**.
+2. Si no usaste el botón: **Create Workspace** y pegá la URL de este repo: `https://github.com/maximilianoPizarro/camel-k-devsandbox`.
+3. Dev Spaces lee el [`devfile.yaml`](devfile.yaml) de la raíz y clona el repo en el workspace. La guía de ese flujo está en [Get started with OpenShift Dev Spaces](https://docs.redhat.com/en/documentation/red_hat_openshift_dev_spaces/3.28/html/user_guide/assembly_getting-started_user_guide).
+4. Esperá a que el workspace arranque. `oc whoami` y `oc project` ya apuntan a tu usuario y a tu proyecto `*-dev`. No copies un token dentro del repo ni del README.
 
 Los commands del devfile aparecen como tareas del IDE. La documentación lo describe en [Customize workspace components](https://docs.redhat.com/en/documentation/red_hat_openshift_dev_spaces/3.28/html/user_guide/assembly_customizing-workspaces_user_guide): **Terminal → Run Task…**, o `F1` y escribí `task`. El esquema de esos commands está en [Defining commands](https://devfile.io/docs/2.2.2/defining-commands).
 
@@ -31,7 +51,7 @@ Ningún paso corre solo al abrir el workspace. Elegís la tarea cuando querés a
 
 ## Tres vistas del mismo lab
 
-**La tarea.** Corre `scripts/up.sh`. Ese script borra el lab anterior, sincroniza el YAML de Kaoto con el Integration y hace `oc apply`. La salida te dice el nombre del Deployment y, si hay HTTP, la URL de la Route.
+**La tarea.** Los Pasos 1 a 5 corren `scripts/up.sh`. Ese script borra el lab anterior, sincroniza el YAML de Kaoto con el Integration y hace `oc apply`. La salida te dice el nombre del Deployment y, si hay HTTP, la URL de la Route. Las tareas **Local — …** corren el mismo `*.camel.yaml` con Camel JBang dentro del workspace (`scripts/local.sh`).
 
 **La consola de OpenShift.** En la barra de estado del IDE, **Dev Spaces → Open OpenShift Console**. Cambiá a la perspectiva **Developer**, elegí tu proyecto y abrí **Topology**. Ahí ves el Deployment de la Integration, el pod y la flecha de la Route. Los logs están en el pod. La vista está documentada en [Viewing application composition using the Topology view](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/building_applications/odc-viewing-application-composition-using-topology-view).
 
@@ -39,17 +59,26 @@ Ningún paso corre solo al abrir el workspace. Elegís la tarea cuando querés a
 
 Kaoto edita el `*.camel.yaml`. [`scripts/sync.py`](scripts/sync.py) copia ese flujo dentro de `spec.flows` del Integration antes de aplicar. Si cambiaste el canvas, volvé a correr el mismo paso para publicar el cambio.
 
+## Misma ruta: Kaoto, JBang y el operador
+
+El archivo `*.camel.yaml` de cada lab es el que abre Kaoto. Hay dos formas de ejecutarlo:
+
+1. **Camel JBang en el workspace** (tareas **Local — …**). El proceso corre en el contenedor de Dev Spaces. No crea un Integration. Hello y HTTP no necesitan el cluster. Kafka usa solo el Deployment `kafka`. Granite y MCP llaman al predictor de OpenShift AI desde el workspace. El HTTP local usa el puerto **8081** porque el IDE ya ocupa el 8080.
+2. **Operador Camel K** (Pasos 1 a 5). `sync.py` copia el flujo al Integration y el operador construye la imagen en tu proyecto.
+
+La instalación del CLI está en [Camel CLI — Getting Started](https://camel.apache.org/manual/camel-jbang-getting-started.html). Este workshop fija la versión 4.22.0 como en [Installation Options](https://camel.apache.org/manual/camel-jbang-installation.html). Las opciones de `camel run` están en [camel run](https://camel.apache.org/manual/jbang-commands/camel-jbang-run.html). Corré primero **Local — Instalar Camel JBang**. El home del workspace es efímero: si recreás el workspace, volvé a instalar.
+
 ## Cuota y por qué hay un solo lab vivo
 
 En el sandbox de referencia la cuota de pods largos es 3 CPU de request y 30Gi de memoria, sin GPU. Los builds de OpenShift tienen otra cuota (3 CPU y 14Gi). El LimitRange del proyecto pone 1 CPU y 1000Mi de limit a todo contenedor que no declara recursos. Todos los manifiestos de este repo declaran request y limit.
 
 Sin un `IntegrationPlatform` en tu proyecto, el operador publica la imagen del kit en el namespace `camel-k-operator`. Ese registry no acepta el pull de tu ServiceAccount, y el pod queda en `ImagePullBackOff`. [`scripts/platform.sh`](scripts/platform.sh) crea el IntegrationPlatform `camel-k` para que la imagen quede en un ImageStream de tu proyecto. El build usa la estrategia `routine` (corre dentro del operador) y publica con `S2I`. Un pod builder no sirve en este sandbox: el usuario no puede delegar `builds/status`, y sin eso el builder no puede cerrar el Build. `up.sh` corre ese script antes de cada lab. El primer build baja dependencias Maven y puede tardar varios minutos. No crea un pod de build en tu cuota.
 
-El workspace, un Integration y, en el paso 3, el broker entran juntos. Igual cada paso borra al anterior para no acumular Routes, pods ni el broker mientras avanzás. La regla de cuota por proyecto está en [Resource quotas](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/working_with_quotas/quotas-setting-per-project-quotas). El artículo [Try Camel K in the Developer Sandbox](https://developers.redhat.com/articles/2023/03/30/try-camel-k-developer-sandbox-red-hat-openshift) muestra el mismo modelo: el operador vive fuera de tu proyecto y reacciona al Integration que creás. La configuración del registry está en [Camel K registry](https://camel.apache.org/camel-k/2.11.x/installation/registry.html) y en `oc explain integrationplatform.spec.build`.
+El workspace, un Integration y, en el paso 3, el broker entran juntos. Igual cada paso borra al anterior para no acumular Routes, pods ni el broker mientras avanzás. Las tareas Local también bajan el lab del operador antes de arrancar, para no sumar dos JVMs de Camel a la cuota. La regla de cuota por proyecto está en [Resource quotas](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/working_with_quotas/quotas-setting-per-project-quotas). El artículo [Try Camel K in the Developer Sandbox](https://developers.redhat.com/articles/2023/03/30/try-camel-k-developer-sandbox-red-hat-openshift) muestra el mismo modelo: el operador vive fuera de tu proyecto y reacciona al Integration que creás. La configuración del registry está en [Camel K registry](https://camel.apache.org/camel-k/2.11.x/installation/registry.html) y en `oc explain integrationplatform.spec.build`.
 
 Para ver el consumo en cualquier momento: **Terminal → Run Task… → Estado del proyecto**, o `bash scripts/status.sh`.
 
-Los recursos de los labs llevan `app.kubernetes.io/part-of=camel-k-workshop`. El Paso 0 borra Integrations, Deployments, Services, Routes, ConfigMaps y Secrets con esa etiqueta. No toca el IntegrationPlatform `camel-k`, los CamelCatalog ni el Service `modelmesh-serving`.
+Los recursos de los labs llevan `app.kubernetes.io/part-of=camel-k-workshop`. El Paso 0 borra Integrations, Deployments, Services, Routes, ConfigMaps y Secrets con esa etiqueta. No toca el IntegrationPlatform `camel-k`, los CamelCatalog ni el Service `modelmesh-serving`. El Paso 0 **no** detiene Camel JBang: para eso está **Local — Detener**.
 
 ## Paso 1 — Hello
 
@@ -63,7 +92,7 @@ Los recursos de los labs llevan `app.kubernetes.io/part-of=camel-k-workshop`. El
 2. `setBody` fija el saludo.
 3. `log` lo escribe en stdout del pod.
 
-**Tarea.** Paso 1 — Hello.
+**Tarea.** Paso 1 — Hello. La misma ruta en el workspace: **Local — Hello** (el log sale en la terminal de la tarea, sin Deployment).
 
 **Consola.** Topology → Deployment `hello` → pod → **Logs**. La línea esperada es `hello Hola desde Camel K en Developer Sandbox`. El primer build puede tardar varios minutos. La tarea espera la condición `Ready`.
 
@@ -88,7 +117,7 @@ Anotá `phase` e `image` que imprime la tarea, y en el log la línea `Apache Cam
 
 **Ruta.** [`labs/02-http/hello.camel.yaml`](labs/02-http/hello.camel.yaml). `platform-http:/hello` acepta solo GET, fija `Content-Type` y devuelve `Hola desde platform-http`.
 
-**Tarea.** Paso 2 — HTTP. Reemplaza al Paso 1.
+**Tarea.** Paso 2 — HTTP. Reemplaza al Paso 1. En el workspace: **Local — HTTP** sirve el mismo YAML en `http://127.0.0.1:8081/hello` (sin Route de OpenShift).
 
 **Consola.** Topology → nodo `http-hello` → la flecha de la Route abre `https://<route>/hello`. La tarea también hace ese `curl` y muestra el cuerpo.
 
@@ -114,7 +143,7 @@ Anotá `phase` e `image` que imprime la tarea, y en el log la línea `Apache Cam
 
 El listener de clientes es PLAINTEXT y solo se anuncia dentro del namespace (`advertised.listeners=PLAINTEXT://kafka:9092`). El controller de KRaft escucha en `127.0.0.1:9093`: Kafka 3.9 rechaza `0.0.0.0` como dirección anunciada del controller. No lo expongas con una Route.
 
-**Tarea.** Paso 3 — Kafka. La tarea espera el rollout del broker y después la Integration.
+**Tarea.** Paso 3 — Kafka. La tarea espera el rollout del broker y después la Integration. En el workspace: **Local — Kafka** sube solo el broker y corre `orders.camel.yaml` con JBang (sin Integration `orders`).
 
 **Consola.** Topology muestra el Deployment `kafka` y el Deployment `orders`. En los logs de `orders` tienen que aparecer `publicado pedido A-100` y `pedido recibido pedido A-100`. La primera línea del consumer puede tardar hasta el primer tick de 15 segundos, después de la espera inicial.
 
@@ -148,7 +177,7 @@ Esa URL solo resuelve dentro del cluster. La Route del lab es la que abrís desd
 
 **TLS.** El predictor presenta un certificado firmado por la CA de servicio de OpenShift. Esa CA está en cada pod en `/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt`. [`platform/SandboxTrust.java`](platform/SandboxTrust.java) la carga en un `SSLContextParameters` registrado como `sandboxSsl`. No desactiva la verificación del nombre. El trait [mount](https://camel.apache.org/camel-k/next/traits/mount.html) sirve para montar otros ConfigMaps o Secrets; este archivo ya viene montado por OpenShift.
 
-**Tarea.** Paso 4 — Granite. La tarea hace `curl` a `/ask` y muestra el texto del modelo. La primera respuesta puede tardar.
+**Tarea.** Paso 4 — Granite. La tarea hace `curl` a `/ask` y muestra el texto del modelo. La primera respuesta puede tardar. En el workspace: **Local — Granite** usa el mismo YAML y `SandboxTrust.java` en el puerto 8081; el token va en la variable de entorno del proceso, no a un Secret.
 
 **Consola.** Abrí la flecha de la Route. La raíz no es `/ask`: sumá `/ask` al final de la URL.
 
@@ -178,7 +207,7 @@ Camel 4.22 trae [MCP Server](https://camel.apache.org/components/4.22.x/others/m
 - `ai-tool:order-status` (tag `orders`) toma `orderId` del header y llama a `direct:order-status`. Esa es la herramienta MCP.
 - `platform-http:/ask` llama la misma lógica (por defecto `A-100`, o `?orderId=B-200`) y le pide a Granite una frase.
 
-**Tarea.** Paso 5 — MCP. Imprime `initialize`, `tools/list`, `tools/call` de `A-100` y el `GET /ask?orderId=B-200`.
+**Tarea.** Paso 5 — MCP. Imprime `initialize`, `tools/list`, `tools/call` de `A-100` y el `GET /ask?orderId=B-200`. En el workspace: **Local — MCP** usa runtime Quarkus para fijar `quarkus.camel.mcp-server.tags=orders` al construir, y prueba contra `127.0.0.1:8081`.
 
 **Consola.** La Route sirve `/mcp` y `/ask` en el mismo host. Topology muestra un Deployment, `mcp`.
 
@@ -201,13 +230,23 @@ Camel 4.22 trae [MCP Server](https://camel.apache.org/components/4.22.x/others/m
 
 **ImagePullBackOff.** La imagen del kit se publicó en `camel-k-operator`. Volvé a correr el paso: `scripts/platform.sh` deja el IntegrationPlatform `camel-k` en tu proyecto para que el ImageStream sea local. No borres ese IntegrationPlatform.
 
-**401 del modelo.** El token venció. Volvé a correr el Paso 4 o el 5. La tarea recrea el Secret con `oc whoami -t`.
+**401 del modelo.** El token venció. Volvé a correr el Paso 4 o el 5 (o Local — Granite / Local — MCP). La tarea recrea el Secret o exporta `LLM_TOKEN` otra vez.
 
 **PKIX o hostname en el Paso 4 o 5.** El predictor no presentó la CA de `service-ca.crt`, o el nombre del certificado no coincide con el host del Service. El mensaje queda en el log de la Integration y en el cuerpo de `/ask`.
 
 **Kaoto no aparece.** El registry embebido de Dev Spaces a veces no tiene `redhat.vscode-kaoto`. Instalá el VSIX desde [Open VSX](https://open-vsx.org/extension/redhat/vscode-kaoto). La lista de formatos que abre el editor está en la [documentación de Kaoto](https://kaoto.io/docs/).
 
 **La Route no abre.** `oc get route`. El host es el de tu proyecto. Sumá el path (`/hello`, `/ask` o `/mcp`).
+
+**Camel JBang no está.** Corré **Local — Instalar Camel JBang**. Si recreaste el workspace, el home efímero se borra y hay que instalar de nuevo.
+
+**Puerto 8080 ocupado.** Las tareas Local HTTP, Granite y MCP usan el **8081**. No uses `--port 8080` en el workspace: ahí escucha el IDE.
+
+**OOM en el workspace.** El contenedor limita a 4Gi. Detené JBang con **Local — Detener** y bajá el lab del operador con el Paso 0 antes de volver a correr Local — MCP (el build Quarkus es el más pesado).
+
+**`tools/list` vacío en Local — MCP.** El tag `orders` no llegó al build Quarkus. Revisá el log de la tarea y que `scripts/local.sh` pase `quarkus.camel.mcp-server.tags=orders`.
+
+**Paso 0 no detiene JBang.** El Paso 0 solo borra recursos del cluster con la etiqueta del workshop. Para el proceso local usá **Local — Detener**.
 
 ## Índice de documentación
 
@@ -239,6 +278,13 @@ Camel 4.22, la línea que construye el operador del sandbox
 - [langchain4j-tools](https://camel.apache.org/components/4.22.x/langchain4j-tools-component.html)
 - [choice](https://camel.apache.org/components/4.22.x/eips/choice-eip.html)
 - [JSON data format](https://camel.apache.org/components/4.22.x/dataformats/json-dataformat.html)
+
+Camel JBang
+
+- [Camel CLI — Getting Started](https://camel.apache.org/manual/camel-jbang-getting-started.html)
+- [Installation Options](https://camel.apache.org/manual/camel-jbang-installation.html) (versión fija)
+- [camel run](https://camel.apache.org/manual/jbang-commands/camel-jbang-run.html)
+- [Managing integrations](https://camel.apache.org/manual/camel-jbang-managing.html) (`camel ps`, `camel stop`)
 
 Kaoto, Dev Spaces y OpenShift
 

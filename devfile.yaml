@@ -16,9 +16,9 @@ components:
     container:
       image: quay.io/devfile/universal-developer-image:ubi9-latest
       memoryRequest: 512Mi
-      memoryLimit: 2Gi
+      memoryLimit: 4Gi
       cpuRequest: 200m
-      cpuLimit: "1"
+      cpuLimit: "2"
       mountSources: true
       sourceMapping: /projects
 commands:
@@ -73,6 +73,69 @@ commands:
       commandLine: bash scripts/up.sh 05-mcp
       workingDir: ${PROJECT_SOURCE}
       label: Paso 5 — MCP
+      group:
+        kind: run
+        isDefault: false
+  - id: local-install
+    exec:
+      component: tools
+      commandLine: bash scripts/local.sh install
+      workingDir: ${PROJECT_SOURCE}
+      label: Local — Instalar Camel JBang
+      group:
+        kind: run
+        isDefault: false
+  - id: local-hello
+    exec:
+      component: tools
+      commandLine: bash scripts/local.sh hello
+      workingDir: ${PROJECT_SOURCE}
+      label: Local — Hello
+      group:
+        kind: run
+        isDefault: false
+  - id: local-http
+    exec:
+      component: tools
+      commandLine: bash scripts/local.sh http
+      workingDir: ${PROJECT_SOURCE}
+      label: Local — HTTP
+      group:
+        kind: run
+        isDefault: false
+  - id: local-kafka
+    exec:
+      component: tools
+      commandLine: bash scripts/local.sh kafka
+      workingDir: ${PROJECT_SOURCE}
+      label: Local — Kafka
+      group:
+        kind: run
+        isDefault: false
+  - id: local-granite
+    exec:
+      component: tools
+      commandLine: bash scripts/local.sh granite
+      workingDir: ${PROJECT_SOURCE}
+      label: Local — Granite
+      group:
+        kind: run
+        isDefault: false
+  - id: local-mcp
+    exec:
+      component: tools
+      commandLine: bash scripts/local.sh mcp
+      workingDir: ${PROJECT_SOURCE}
+      label: Local — MCP
+      group:
+        kind: run
+        isDefault: false
+  - id: local-stop
+    exec:
+      component: tools
+      commandLine: bash scripts/local.sh stop
+      workingDir: ${PROJECT_SOURCE}
+      label: Local — Detener
       group:
         kind: run
         isDefault: false
