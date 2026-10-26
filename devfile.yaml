@@ -21,28 +21,7 @@ components:
       cpuLimit: "2"
       mountSources: true
       sourceMapping: /projects
-events:
-  postStart:
-    - install-jbang
 commands:
-  # --- bootstrap: se ejecuta solo al crear el workspace ---
-  - id: install-jbang
-    exec:
-      component: tools
-      commandLine: >-
-        export PATH="${HOME}/.jbang/bin:${PATH}";
-        command -v jbang >/dev/null 2>&1 ||
-        { curl -Ls https://sh.jbang.dev | bash -s - app setup && export PATH="${HOME}/.jbang/bin:${PATH}"; };
-        camel version 2>/dev/null | grep -q 4.22.0 ||
-        jbang app install --force --fresh
-        -Dcamel.jbang.version=4.22.0 -Dcamel-kamelets.version=4.22.0
-        camel@apache/camel;
-        grep -q '.jbang/bin' "${HOME}/.bashrc" 2>/dev/null ||
-        echo 'export PATH="${HOME}/.jbang/bin:${PATH}"' >> "${HOME}/.bashrc";
-        camel version
-      workingDir: ${PROJECT_SOURCE}
-      label: Instalar JBang y Camel CLI 4.22.0
-
   # --- operador Camel K (Pasos 0-5) ---
   - id: paso-0-limpiar
     exec:
@@ -100,10 +79,14 @@ commands:
         isDefault: false
 
   # --- Camel JBang local (mismo *.camel.yaml, sin Integration) ---
+  # El source scripts/install-jbang.sh instala JBang + Camel CLI 4.22.0
+  # la primera vez; despues es instantaneo. El comando camel run que sigue
+  # es el que copies a cualquier terminal.
   - id: local-hello
     exec:
       component: tools
       commandLine: >-
+        source scripts/install-jbang.sh &&
         camel run labs/01-hello/hello.camel.yaml
         --java-version=17 --jvm-args=-Xmx1024m
       workingDir: ${PROJECT_SOURCE}
@@ -115,6 +98,7 @@ commands:
     exec:
       component: tools
       commandLine: >-
+        source scripts/install-jbang.sh &&
         camel run labs/02-http/hello.camel.yaml
         --java-version=17 --jvm-args=-Xmx1024m --port=8081
       workingDir: ${PROJECT_SOURCE}
@@ -126,6 +110,7 @@ commands:
     exec:
       component: tools
       commandLine: >-
+        source scripts/install-jbang.sh &&
         oc apply -f labs/03-kafka/kafka.yaml &&
         oc rollout status deployment/kafka --timeout=300s &&
         camel run labs/03-kafka/orders.camel.yaml
@@ -139,6 +124,7 @@ commands:
     exec:
       component: tools
       commandLine: >-
+        source scripts/install-jbang.sh &&
         export LLM_TOKEN=$(oc whoami -t) &&
         camel run labs/04-granite/ask.camel.yaml platform/SandboxTrust.java
         --java-version=17 --jvm-args=-Xmx1024m --port=8081
@@ -151,6 +137,7 @@ commands:
     exec:
       component: tools
       commandLine: >-
+        source scripts/install-jbang.sh &&
         export LLM_TOKEN=$(oc whoami -t) &&
         camel run labs/05-mcp/mcp.camel.yaml platform/SandboxTrust.java
         --runtime=quarkus
@@ -168,7 +155,10 @@ commands:
   - id: local-stop
     exec:
       component: tools
-      commandLine: camel stop 2>/dev/null || true; echo "Proceso local detenido."
+      commandLine: >-
+        export PATH="${HOME}/.jbang/bin:${PATH}";
+        camel stop 2>/dev/null || true;
+        echo "Proceso local detenido."
       workingDir: ${PROJECT_SOURCE}
       label: "Local — Detener"
       group:

@@ -26,7 +26,7 @@ El operador Camel K ya está instalado en el sandbox y observa tu proyecto. Esto
 
 ### Misma ruta, en el workspace (Camel JBang)
 
-JBang y el Camel CLI 4.22.0 se instalan solos al crear el workspace (evento `postStart` del devfile). El comando `camel` queda disponible en todas las terminales.
+La primera tarea Local que ejecutes instala JBang y el Camel CLI 4.22.0 automáticamente (las siguientes veces es instantáneo). El comando `camel run` aparece directo en el devfile para que lo copies a cualquier terminal. Desde una terminal manual: `source scripts/install-jbang.sh` y después el `camel run` que quieras.
 
 | Tarea | Comando | Qué mirar |
 | --- | --- | --- |
@@ -67,7 +67,7 @@ El archivo `*.camel.yaml` de cada lab es el que abre Kaoto. Hay dos formas de ej
 1. **Camel JBang en el workspace** (tareas **Local — …**). El proceso corre en el contenedor de Dev Spaces. No crea un Integration. Hello y HTTP no necesitan el cluster. Kafka usa solo el Deployment `kafka`. Granite y MCP llaman al predictor de OpenShift AI desde el workspace. El HTTP local usa el puerto **8081** porque el IDE ya ocupa el 8080.
 2. **Operador Camel K** (Pasos 1 a 5). `sync.py` copia el flujo al Integration y el operador construye la imagen en tu proyecto.
 
-La instalación del CLI está en [Camel CLI — Getting Started](https://camel.apache.org/manual/camel-jbang-getting-started.html). Este workshop fija la versión 4.22.0 como en [Installation Options](https://camel.apache.org/manual/camel-jbang-installation.html). Las opciones de `camel run` están en [camel run](https://camel.apache.org/manual/jbang-commands/camel-jbang-run.html). El workspace instala JBang y el Camel CLI al arrancar (evento `postStart` del devfile). El home es efímero: si recreás el workspace, se vuelve a instalar solo.
+La instalación del CLI está en [Camel CLI — Getting Started](https://camel.apache.org/manual/camel-jbang-getting-started.html). Este workshop fija la versión 4.22.0 como en [Installation Options](https://camel.apache.org/manual/camel-jbang-installation.html). Las opciones de `camel run` están en [camel run](https://camel.apache.org/manual/jbang-commands/camel-jbang-run.html). La primera tarea Local que corras instala JBang y el CLI automáticamente (`source scripts/install-jbang.sh`). El home es efímero: si recreás el workspace, se vuelve a instalar con la primera tarea.
 
 ## Cuota y por qué hay un solo lab vivo
 
@@ -239,7 +239,7 @@ Camel 4.22 trae [MCP Server](https://camel.apache.org/components/4.22.x/others/m
 
 **La Route no abre.** `oc get route`. El host es el de tu proyecto. Sumá el path (`/hello`, `/ask` o `/mcp`).
 
-**Camel JBang no está.** El workspace lo instala al arrancar (`postStart`). Si no se completó, abrí una terminal y corré: `curl -Ls https://sh.jbang.dev | bash -s - app setup && export PATH="${HOME}/.jbang/bin:${PATH}" && jbang app install --force --fresh -Dcamel.jbang.version=4.22.0 -Dcamel-kamelets.version=4.22.0 camel@apache/camel`.
+**Camel JBang no está.** La primera tarea Local lo instala. Para instalarlo manualmente, abrí una terminal y corré: `source scripts/install-jbang.sh`.
 
 **Puerto 8080 ocupado.** Las tareas Local HTTP, Granite y MCP usan el **8081**. No uses `--port 8080` en el workspace: ahí escucha el IDE.
 
